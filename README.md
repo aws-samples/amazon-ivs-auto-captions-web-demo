@@ -12,7 +12,7 @@ This is a serverless web application, leveraging [Amazon IVS](https://aws.amazon
 
 ## Getting Started
 
-***IMPORTANT NOTE:** Deploying this demo application in your AWS account will create and consume AWS resources, which will cost money.*
+⚠️ **IMPORTANT NOTE:** *Deploying this demo application in your AWS account will create and consume AWS resources, which will cost money.*
 
 To get the demo running in your own AWS account, follow these instructions.
 
