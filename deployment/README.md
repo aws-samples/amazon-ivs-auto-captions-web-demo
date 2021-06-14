@@ -68,8 +68,6 @@ Open up the player using the **Player URL** value provided in the console output
 
 Optionally, you can configure [certain aspects of the demo](../configuration/README.md).
 
-Enjoy!
-
 <br>
 
 ## Cleanup
