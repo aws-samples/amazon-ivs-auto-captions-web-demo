@@ -14,7 +14,7 @@ Run `bash assign-random-suffix.sh`.
 
 This will generate a 6 character length alphanumeric value. Then, it will update the [cloudformation.yaml](./cloudformation.yaml) file and bash script files by replacing the placeholder `<RANDOM_SUFFIX>`, located at the end of the resource names, with the random value generated to ensure uniqueness.
 
-> **Of note:**<br>
+> **Note:**<br>
 > There is no script to reverse this step, but you can use Git to discard all changes and go back to the original state.
 
 ### 2) Configure AWS CLI
@@ -31,7 +31,7 @@ This will deploy the demo infrastructure in AWS and then perform the following c
 * [Configure custom vocabulary](../configuration/README.md#configure-custom-vocabulary)
 * [Configure vocabulary filter](../configuration/README.md#configure-vocabulary-filter)
 
-> **Of note:**<br>
+> **Note:**<br>
 > On MacOS, some steps of the deployment show large outputs that require you to press "q" to continue with the deployment execution.
 
 In case of failure, check the script outputs and the CloudFormation console. Common issues are:

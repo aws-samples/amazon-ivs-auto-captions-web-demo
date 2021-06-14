@@ -22,7 +22,7 @@ To get the demo running in your own AWS account, follow these instructions.
 
 ### Deploying to AWS
 * This demo is comprised of two parts: `serverless` (the demo backend) and `web-ui` (the demo frontend).
-* To run the demo, follow the [deployment instructions](./deployment/README.md).
+* To use this demo, follow the [deployment instructions](./deployment/README.md).
 * To configure the demo (optional), follow the [configuration instructions](./configuration/README.md).
 
 
