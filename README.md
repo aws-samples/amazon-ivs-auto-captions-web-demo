@@ -1,6 +1,6 @@
 # Amazon IVS Auto-captions Web demo
 
-A demo web application for demonstrating how you can use Amazon IVS in conjunction with Amazon Transcribe to deliver real-time captions for a live streams.
+A demo web application for demonstrating how you can use Amazon IVS in conjunction with Amazon Transcribe to deliver real-time captions for live streams.
 
 ![Auto-captions demo](auto-captions-demo.jpg)
 
