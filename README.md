@@ -25,6 +25,13 @@ To get the demo running in your own AWS account, follow these instructions.
 * To run the demo, follow the [deployment instructions](./deployment/README.md).
 * To configure the demo (optional), follow the [configuration instructions](./configuration/README.md).
 
+
+<br>
+
+## Architecture
+
+![architecture](architecture.png)
+
 <br>
 
 ## Known issues and limitations
