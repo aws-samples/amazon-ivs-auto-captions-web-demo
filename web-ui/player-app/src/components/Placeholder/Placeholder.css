@@ -1,0 +1,59 @@
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.placeholder {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 4;
+}
+
+.placeholder-content {
+  position: relative;
+}
+
+.placeholder-spinner {
+  position: relative;
+  animation: rotate 1s linear infinite;
+  border-radius: 50%;
+  height: 38px;
+  width: 38px;
+}
+
+.placeholder-spinner:after {
+  content: '';
+  position: absolute;
+  background: #000;
+  border-radius: 50%;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+}
+
+.placeholder-gradient {
+  position: absolute;
+  border-radius: 50%;
+  background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%;
+  background-repeat: no-repeat;
+  background-size: 50% 50%;
+  top: -1px;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+}
+
+.placeholder-message {
+  color: #FFF;
+}

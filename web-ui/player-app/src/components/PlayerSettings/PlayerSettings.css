@@ -1,0 +1,8 @@
+.player-settings label{
+  display: block;
+  padding: 5px;
+}
+
+.close-icon {
+  float: right;
+}

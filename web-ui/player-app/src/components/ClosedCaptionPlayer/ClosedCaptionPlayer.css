@@ -1,0 +1,134 @@
+:root {
+  --border-radius: 12px;
+}
+
+.stream-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  align-items: center;
+}
+
+/* handles the 16:9 aspect ratio */
+.aspect-16x9 {
+  position: relative;
+  padding-top: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+}
+
+.player {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.player:hover .player-ui-controls {
+  z-index: 1;
+}
+
+.video-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-ui {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.player-ui-captions {
+  padding: 5px;
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.player-ui-captions__text {
+  padding: 7px 9px;
+  width: 100%;
+  max-width: 290px;
+  background-color: #000;
+  font-size: 16px;
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.player-ui-controls {
+  padding: 5px 10px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8));
+  display: flex;
+  flex-direction: row;
+  z-index: -1;
+}
+
+.player-ui-controls__actions {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+}
+
+.player-ui-controls__actions--right {
+  justify-content: flex-end;
+}
+
+.player-ui-button {
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+  color: white;
+}
+
+@media (max-width: 767px) {
+  .player-ui-captions__text {
+    font-size: 12px;
+  }
+
+  .player-ui-button {
+    margin: 0;
+    padding: 5px;
+  }
+}
+
+.player-debug {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  z-index: 2;
+}
+
+.player-settings {
+  min-width: 300px;
+  margin: auto;
+  padding: 5px;
+  background-color: white;
+  text-align: center;
+  border-radius: 5px;
+  overflow: auto;
+  z-index: 6;
+}
+
+.player-settings h3 {
+  padding-bottom: 10px;
+}
+
+.player-settings h3, .player-settings h4, .player-settings .close-icon {
+  color: #EB5F07;
+}

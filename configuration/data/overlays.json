@@ -1,0 +1,23 @@
+[
+  {
+    "keyword": "Amazon",
+    "imageUrl": "https://d39ii5l128t5ul.cloudfront.net/amazon.png",
+    "website": "https://www.amazon.com/"
+  },
+  {
+    "keyword": "AWS",
+    "imageUrl": "https://d39ii5l128t5ul.cloudfront.net/aws.png",
+    "website": "https://aws.amazon.com/"
+  },
+  {
+    "keyword": "Twitch",
+    "imageUrl": "https://d39ii5l128t5ul.cloudfront.net/twitch.png",
+    "website": "https://www.twitch.tv/"
+  }
+  ,
+  {
+    "keyword": "IVS",
+    "imageUrl": "https://d39ii5l128t5ul.cloudfront.net/ivs.png",
+    "website": "https://ivs.rocks/"
+  }
+]

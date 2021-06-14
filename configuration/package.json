@@ -1,0 +1,10 @@
+{
+  "name": "configuration",
+  "version": "1.0.0",
+  "description": "Configuration scripts folder",
+  "dependencies": {
+    "aws-sdk": "^2.913.0",
+    "lodash": "^4.17.21",
+    "minimist": "^1.2.5"
+  }
+}

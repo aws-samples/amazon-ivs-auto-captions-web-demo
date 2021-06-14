@@ -1,0 +1,785 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: AWS CloudFormation template for Amazon IVS Transcribe demo - suffix <RANDOM_SUFFIX>
+
+Parameters:
+  
+  # Lambda functions parameters
+  LambdaOnConnectFunctionName:
+    Type: String
+    Description: Name of the lambda-on-connect function
+    Default: ivs-transcribe-demo-on-connect-<RANDOM_SUFFIX>
+
+  LambdaOnDisconnectFunctionName:
+    Type: String
+    Description: Name of the lambda-on-disconnect function
+    Default: ivs-transcribe-demo-on-disconnect-<RANDOM_SUFFIX>
+
+  LambdaSendTranscriptionFunctionName:
+    Type: String
+    Description: Name of the lambda-send-transcription function
+    Default: ivs-transcribe-demo-send-transcription-<RANDOM_SUFFIX>
+
+  # ECS resources parameters
+  ECSClusterName:
+    Type: String
+    Description: Name of the ECS Cluster
+    Default: ivs-transcribe-demo-cluster-<RANDOM_SUFFIX>
+
+  StreamServiceName:
+    Type: String
+    Description: Name of the Stream service
+    Default: ivs-transcribe-demo-stream-service-<RANDOM_SUFFIX>
+
+  TranscribeServiceName:
+    Type: String
+    Description: Name of the Transcribe service
+    Default: ivs-transcribe-demo-transcribe-service-<RANDOM_SUFFIX>
+
+  StreamTaskDefinitionName:
+    Type: String
+    Description: Name of the Stream service task definition
+    Default: ivs-transcribe-demo-stream-task-definition-<RANDOM_SUFFIX>
+
+  TranscribeTaskDefinitionName:
+    Type: String
+    Description: Name of the Transcribe service task definition
+    Default: ivs-transcribe-demo-transcribe-task-definition-<RANDOM_SUFFIX>
+
+  StreamContainerDefinitionName:
+    Type: String
+    Description: Name of the Stream service container definition
+    Default: ivs-transcribe-demo-stream-container-definition-<RANDOM_SUFFIX>
+
+  TranscribeContainerDefinitionName:
+    Type: String
+    Description: Name of the Transcribe service container definition
+    Default: ivs-transcribe-demo-transcribe-container-definition-<RANDOM_SUFFIX>
+
+  StreamServiceLogGroupName:
+    Type: String
+    Description: Name of the Stream service CloudWatch log group
+    Default: /ecs/ivs-transcribe-demo-stream-logs-<RANDOM_SUFFIX>
+
+  TranscribeServiceLogGroupName:
+    Type: String
+    Description: Name of the Transcribe service CloudWatch log group
+    Default: /ecs/ivs-transcribe-demo-transcribe-logs-<RANDOM_SUFFIX>
+
+  PrivateDNSNamespaceName:
+    Type: String
+    Description: Name of the private DNS Namespace
+    Default: rtmp
+
+  ECRStreamRepositoryName:
+    Type: String
+    Description: Name of the private DNS Namespace
+    Default: ivs-transcribe-demo-stream-images-<RANDOM_SUFFIX>
+
+  ECRTranscribeRepositoryName:
+    Type: String
+    Description: Name of the private DNS Namespace
+    Default: ivs-transcribe-demo-transcribe-images-<RANDOM_SUFFIX>
+
+  # S3 resources parameters
+  VocabularyConfigurationBucketName:
+    Type: String
+    Description: Name of the Transcribe service configuration bucket that contains the custom vocabulary and vocabulary filter
+    Default: ivs-transcribe-demo-vocabulary-config-<RANDOM_SUFFIX>
+
+  PlayerAppBucketName:
+    Type: String
+    Description: Name of the Player App bucket
+    Default: ivs-transcribe-demo-player-app-<RANDOM_SUFFIX>
+
+  LambdaFunctionsBucketName:
+    Type: String
+    Description: Name of the bucket that contains the Lambda functions zip files
+    Default: ivs-transcribe-demo-lambda-functions-<RANDOM_SUFFIX>
+
+  IVSChannelName:
+    Type: String
+    Description: Name of the IVS Channel
+    Default: ivs-transcribe-demo-channel-<RANDOM_SUFFIX>
+
+  WriterWebSocketName:
+    Type: String
+    Description: Name of the writer WebSocket used to send transcriptions to clients (players)
+    Default: ivs-transcribe-demo-writer-websocket-<RANDOM_SUFFIX>
+
+  ReaderWebSocketName:
+    Type: String
+    Description: Name of the reader WebSocket used to keep track of the client (player) connections
+    Default: ivs-transcribe-demo-reader-websocket-<RANDOM_SUFFIX>
+
+
+  # DynamoDB resources parameters
+  DynamoDBOverlaysTableName:
+    Type: String
+    Description: Name of the overlays configuration table
+    Default: ivs-transcribe-demo-overlays-<RANDOM_SUFFIX>
+
+  DynamoDBConnectionsTableName:
+    Type: String
+    Description: Name of the connections table
+    Default: ivs-transcribe-demo-connections-<RANDOM_SUFFIX>
+
+    # Other
+  TranscribeCustomVocabularyName:
+    Type: String
+    Description: Name of the custom vocabulary that will be configured in Transcribe
+    Default: ivs-transcribe-demo-custom-vocabulary-<RANDOM_SUFFIX>
+
+  TranscribeVocabularyFilterName:
+    Type: String
+    Description: Name of the vocabulary filter that will be configured in Transcribe
+    Default: ivs-transcribe-demo-vocabulary-filter-<RANDOM_SUFFIX>
+
+Mappings: 
+  SubnetConfig:
+    VPC:
+      CIDR: '24.0.0.0/16'
+    Subnet:
+      CIDR: '24.0.0.0/24'
+
+Resources:
+  # Lambda functions resources
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  # Rules for DynamoDB
+                  - 'dynamodb:Scan'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:DeleteItem'
+
+                  # Rules for CloudWatch
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+
+                  # Rules for API Gateway
+                  - 'execute-api:ManageConnections'
+                Resource: '*'
+
+  LambdaOnConnect:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Role: !GetAtt LambdaExecutionRole.Arn 
+      Code: 
+        S3Bucket: !Ref LambdaFunctionsBucketName
+        S3Key: lambda-on-connect.zip
+      FunctionName: !Ref LambdaOnConnectFunctionName
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DynamoDBConnectionsTableName
+
+  LambdaOnDisconnect:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Role: !GetAtt LambdaExecutionRole.Arn 
+      Code: 
+        S3Bucket: !Ref LambdaFunctionsBucketName
+        S3Key: lambda-on-disconnect.zip
+      FunctionName: !Ref LambdaOnDisconnectFunctionName
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DynamoDBConnectionsTableName
+
+  LambdaSendTranscription:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Role: !GetAtt LambdaExecutionRole.Arn 
+      Code: 
+        S3Bucket: !Ref LambdaFunctionsBucketName
+        S3Key: lambda-send-transcription.zip
+      FunctionName: !Ref LambdaSendTranscriptionFunctionName
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DynamoDBConnectionsTableName
+          GATEWAY_DOMAIN: !Sub "${ReaderWebSocket}.execute-api.${AWS::Region}.amazonaws.com/demo"
+
+
+  ################################## ECS Resources
+  ## VPC
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+
+  Subnet:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap ['SubnetConfig', 'Subnet', 'CIDR']
+      MapPublicIpOnLaunch: true
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    DependsOn: VPC
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  Route:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet
+      RouteTableId: !Ref RouteTable
+
+  ## Security groups
+  StreamServiceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for ECS Stream service 
+      VpcId: !Ref VPC
+
+  StreamServiceSecurityGroupInboundRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt StreamServiceSecurityGroup.GroupId
+      IpProtocol: -1
+      CidrIp: 0.0.0.0/0
+
+  StreamServiceSecurityGroupOutboundRule:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt StreamServiceSecurityGroup.GroupId
+      IpProtocol: -1
+      CidrIp: 0.0.0.0/0
+
+  TranscribeServiceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for ECS Transcribe service  
+      VpcId: !Ref VPC
+
+  TranscribeServiceSecurityGroupInboundRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt TranscribeServiceSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 1935
+      ToPort: 1935
+      CidrIp: 0.0.0.0/0
+
+  TranscribeServiceSecurityGroupOutboundRule:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt TranscribeServiceSecurityGroup.GroupId
+      IpProtocol: -1
+      CidrIp: 0.0.0.0/0
+
+  ## Log groups
+  StreamServiceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref StreamServiceLogGroupName
+
+  TranscribeServiceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref TranscribeServiceLogGroupName
+
+  ## Cluster
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref ECSClusterName
+
+  ## Roles
+  ECSRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs-tasks.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: ecs-service
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+              # Rules which allow ECS to attach network interfaces to instances
+              # on your behalf in order for awsvpc networking mode to work right
+              - 'ec2:AttachNetworkInterface'
+              - 'ec2:CreateNetworkInterface'
+              - 'ec2:CreateNetworkInterfacePermission'
+              - 'ec2:DeleteNetworkInterface'
+              - 'ec2:DeleteNetworkInterfacePermission'
+              - 'ec2:Describe*'
+              - 'ec2:DetachNetworkInterface'
+
+              # Rules for DynamoDB
+              - 'dynamodb:Scan'
+
+              # Rules for Transcribe
+              - 'transcribe:StartStreamTranscription'
+
+              # Rules for API Gateway
+              - 'execute-api:ManageConnections'
+
+              # Rules for IVS
+              - 'ivs:PutMetadata'
+            Resource: '*'
+
+  # This is a role which is used by the ECS tasks themselves.
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs-tasks.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: AmazonECSTaskExecutionRolePolicy
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action:
+                # Allow the ECS Tasks to download images from ECR
+                - 'ecr:GetAuthorizationToken'
+                - 'ecr:BatchCheckLayerAvailability'
+                - 'ecr:GetDownloadUrlForLayer'
+                - 'ecr:BatchGetImage'
+
+                # Allow the ECS tasks to upload logs to CloudWatch
+                - 'logs:CreateLogStream'
+                - 'logs:PutLogEvents'
+              Resource: '*'
+
+  ## Stream service
+  StreamTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Ref StreamTaskDefinitionName
+      ExecutionRoleArn: !Ref ECSTaskExecutionRole
+      ContainerDefinitions:
+        - Name: !Ref StreamContainerDefinitionName
+          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRStreamRepositoryName}:latest'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Sub '${AWS::Region}'
+              awslogs-group: !Ref StreamServiceLogGroupName
+              awslogs-stream-prefix: ecs
+          PortMappings:
+            - ContainerPort: 1935
+              HostPort: 1935
+              Protocol: "tcp"
+            - ContainerPort: 19351
+              HostPort: 19351
+              Protocol: "tcp"
+            - ContainerPort: 80
+              HostPort: 80
+              Protocol: "tcp"
+          Environment:
+            - Name : IVS_INGEST_ENDPOINT
+              Value: !Sub ${IVSChannel.IngestEndpoint}:443
+            - Name : IVS_KEY
+              Value: !GetAtt IVSStreamKey.Value
+          Cpu: 0
+      Memory: 4096
+      TaskRoleArn: !GetAtt ECSRole.Arn
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: 2048
+
+  PrivateDnsNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+        Name: !Ref PrivateDNSNamespaceName
+        Vpc: !Ref VPC
+
+  StreamServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: stream-service 
+      DnsConfig:
+        DnsRecords:
+        - TTL: 60
+          Type: A
+      NamespaceId: !Ref PrivateDnsNamespace
+
+  StreamService:
+    Type: AWS::ECS::Service
+    Properties: 
+      LaunchType: FARGATE
+      EnableExecuteCommand: true
+      Cluster: !Ref ECSCluster
+      ServiceName: !Ref StreamServiceName
+      TaskDefinition: !Ref StreamTaskDefinition
+      DesiredCount: 1
+      NetworkConfiguration: 
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref Subnet
+          SecurityGroups:
+            - !Ref StreamServiceSecurityGroup
+      # Service discovery
+      ServiceRegistries:
+        - RegistryArn: !GetAtt StreamServiceDiscovery.Arn
+
+  # Transcribe service
+  TranscribeTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Ref TranscribeTaskDefinitionName
+      ExecutionRoleArn: !Ref ECSTaskExecutionRole
+      ContainerDefinitions:
+        - Name: !Ref TranscribeContainerDefinitionName
+          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRTranscribeRepositoryName}:latest'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Sub '${AWS::Region}'
+              awslogs-group: !Ref TranscribeServiceLogGroupName
+              awslogs-stream-prefix: ecs
+          Cpu: 0
+          Environment:
+            - Name: AWS_REGION
+              Value: !Sub '${AWS::Region}'
+            - Name: LANGUAGE_CODE
+              Value: 'en-US'
+            - Name: VOCABULARY_NAME
+              Value: !Ref TranscribeCustomVocabularyName
+            - Name: VOCABULARY_FILTER
+              Value: !Ref TranscribeVocabularyFilterName
+            - Name: AWS_IVS_CHANNEL_ARN
+              Value: !Ref IVSChannel
+            - Name: AWS_GW_WS
+              Value: !Join [ "/", [ !GetAtt WriterWebSocket.ApiEndpoint, !Ref WriterWebSocketStage ] ]
+            - Name: RTMP_INPUT
+              Value: !Sub rtmp://${StreamServiceDiscovery.Name}.${PrivateDNSNamespaceName}/ivs/testkey
+            - Name: KEYWORDS_TABLE_NAME
+              Value: !Ref DynamoDBOverlaysTableName
+      Memory: 1024
+      TaskRoleArn: !GetAtt ECSRole.Arn
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: 512
+
+  TranscribeService:
+    Type: AWS::ECS::Service
+    Properties: 
+      LaunchType: FARGATE
+      EnableExecuteCommand: true
+      Cluster: !Ref ECSCluster
+      ServiceName: !Ref TranscribeServiceName
+      TaskDefinition: !Ref TranscribeTaskDefinition
+      DesiredCount: 1
+      NetworkConfiguration: 
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref Subnet
+          SecurityGroups:
+            - !Ref TranscribeServiceSecurityGroup
+
+
+  ################################## IVS resources
+  IVSChannel:
+    Type: AWS::IVS::Channel
+    Properties:
+      Name: !Ref IVSChannelName
+
+  IVSStreamKey:
+     Type: AWS::IVS::StreamKey
+     Properties:
+       ChannelArn: !Ref IVSChannel
+
+
+  ################################## API Gateway resources
+
+  # Api gateway role
+  ApiGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ''
+            Effect: 'Allow'
+            Principal:
+              Service:
+                - 'apigateway.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Path: '/'
+      Policies:
+        - PolicyName: LambdaAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 'lambda:InvokeFunction'
+                Resource: '*'
+
+  WriterWebSocket:
+    Type: 'AWS::ApiGatewayV2::Api'
+    Properties:
+      Name: !Ref WriterWebSocketName
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.action
+
+  ReaderWebSocket:
+    Type: 'AWS::ApiGatewayV2::Api'
+    Properties:
+      Name: !Ref ReaderWebSocketName
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.action
+
+  ## Reader WebSocket routes
+  ### $connect
+  ReaderWebSocketRouteConnect:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: 
+      ApiId: !Ref ReaderWebSocket
+      RouteKey: $connect
+      AuthorizationType: NONE
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref ReaderWebSocketRouteConnectIntegration
+
+  ReaderWebSocketRouteConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ReaderWebSocket
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaOnConnect.Arn}/invocations
+      CredentialsArn: !GetAtt ApiGatewayRole.Arn
+
+  ### $disconnect
+  ReaderWebSocketRouteDisconnect:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: 
+      ApiId: !Ref ReaderWebSocket
+      RouteKey: $disconnect
+      AuthorizationType: NONE
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref ReaderWebSocketRouteDisconnectIntegration
+
+  ReaderWebSocketRouteDisconnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ReaderWebSocket
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaOnDisconnect.Arn}/invocations
+      CredentialsArn: !GetAtt ApiGatewayRole.Arn
+
+  ## Writer WebSocket routes
+  ### sendtrancription
+  WriterWebSocketRouteSendTranscription:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: 
+      ApiId: !Ref WriterWebSocket
+      RouteKey: sendtranscription
+      AuthorizationType: NONE
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref WriterWebSocketRouteSendTranscriptionIntegration
+
+  WriterWebSocketRouteSendTranscriptionIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WriterWebSocket
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaSendTranscription.Arn}/invocations
+      CredentialsArn: !GetAtt ApiGatewayRole.Arn
+
+  ## Stages
+  ReaderWebSocketStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties: 
+      StageName: demo
+      ApiId: !Ref ReaderWebSocket
+
+  WriterWebSocketStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties: 
+      StageName: demo
+      ApiId: !Ref WriterWebSocket
+
+  ## Deployments
+  ReaderWebSocketDeployment:
+    DependsOn: [ReaderWebSocketRouteConnect, ReaderWebSocketRouteDisconnect]
+    Type: AWS::ApiGatewayV2::Deployment
+    Properties:
+      ApiId: !Ref ReaderWebSocket
+      StageName: demo
+
+  WriterWebSocketDeployment:
+    DependsOn: [WriterWebSocketRouteSendTranscription]
+    Type: AWS::ApiGatewayV2::Deployment
+    Properties:
+      ApiId: !Ref WriterWebSocket
+      StageName: demo
+  
+  ################################## S3 resources
+  TranscribeConfigurationBucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref VocabularyConfigurationBucketName
+
+  PlayerAppBucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref PlayerAppBucketName
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  PlayerAppBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref PlayerAppBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Id: "PolicyForCloudFrontPrivateContent"
+        Statement:
+          - Effect: Allow
+            Principal: 
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontPlayerAppOriginAccessIdentity}"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${PlayerAppBucket}/*"
+
+  ################################## DynamoDB resources
+  DynamoDbOverlaysTable: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: !Ref DynamoDBOverlaysTableName
+      AttributeDefinitions: 
+        - AttributeName: "keyword"
+          AttributeType: "S"
+      KeySchema: 
+        - AttributeName: "keyword"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+
+  DynamoDbConnectionsTable: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: !Ref DynamoDBConnectionsTableName
+      AttributeDefinitions: 
+        - AttributeName: "connectionId"
+          AttributeType: "S"
+      KeySchema: 
+        - AttributeName: "connectionId"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+
+  CloudFrontPlayerAppOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties: 
+      CloudFrontOriginAccessIdentityConfig: 
+        Comment: !Sub "access-identity-${PlayerAppBucketName}.s3.amazonaws.com"
+
+  CloudFrontPlayerAppDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn: ['PlayerAppBucket'] 
+    Properties: 
+      DistributionConfig: 
+        DefaultRootObject: 'index.html'
+        Enabled: true
+        Origins: 
+        - DomainName: !GetAtt PlayerAppBucket.RegionalDomainName
+          ConnectionAttempts: 3
+          ConnectionTimeout: 10
+          Id: !Sub "S3-${PlayerAppBucketName}"
+          S3OriginConfig:
+            OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontPlayerAppOriginAccessIdentity}"
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: 'true'
+        DefaultCacheBehavior:
+          ViewerProtocolPolicy: redirect-to-https 
+          AllowedMethods:
+          - GET
+          - HEAD
+          TargetOriginId: !Sub "S3-${PlayerAppBucketName}"
+          ForwardedValues:
+            QueryString: false
+        
+Outputs:
+  AWSRegion:
+    Value: !Ref AWS::Region
+
+  ReaderWebSocketURL:
+    Value: !Sub "wss://${ReaderWebSocket}.execute-api.${AWS::Region}.amazonaws.com/demo"
+
+  StreamPlaybackURL:
+    Value: !GetAtt IVSChannel.PlaybackUrl
+ 
+  PlayerAppURL:
+    Value: !GetAtt CloudFrontPlayerAppDistribution.DomainName
+  
+  ClusterName:
+    Value: !Ref ECSClusterName
+  
+  StreamServiceName:
+    Value: !Ref StreamServiceName
+
+  WriterWebSocketApiId:
+    Value: !Ref WriterWebSocket
+
+  ReaderWebSocketApiId:
+    Value: !Ref ReaderWebSocket

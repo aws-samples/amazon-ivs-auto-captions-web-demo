@@ -1,0 +1,59 @@
+{
+  "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/stream-prod",
+          "awslogs-region": "<AWS_REGION>",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
+        }
+      },
+      "portMappings": [
+        {
+          "hostPort": 1935,
+          "protocol": "tcp",
+          "containerPort": 1935
+        },
+        {
+          "hostPort": 19351,
+          "protocol": "tcp",
+          "containerPort": 19351
+        },
+        {
+          "hostPort": 80,
+          "protocol": "tcp",
+          "containerPort": 80
+        },
+        {
+          "hostPort": 22,
+          "protocol": "tcp",
+          "containerPort": 22
+        }
+      ],
+      "cpu": 0,
+      "secrets": [
+        {
+          "name": "IVS_INGEST_ENDPOINT",
+          "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/ivs/prod/ivs_ingest_endpoint"
+        },
+        {
+          "name": "IVS_KEY",
+          "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/ivs/prod/ivs_key"
+        }
+      ],
+      "memoryReservation": 512,
+      "volumesFrom": [],
+      "image": "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/ivs-stream-prod",
+      "name": "stream-prod"
+    }
+  ],
+  "memory": "4096",
+  "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ECSTranscriberTaskIAMRole",
+  "family": "stream-task-prod",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "2048"
+}

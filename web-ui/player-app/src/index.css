@@ -1,0 +1,35 @@
+:root {
+  --color-bg: #F7F7F7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: hsla(220, 13%, 10%, 1);
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif;
+  display: grid;
+  justify-content: center;
+  background: var(--color-bg);
+}
+
+button {
+  border: none;
+  background: none;
+  outline: none;
+  cursor: pointer;
+}

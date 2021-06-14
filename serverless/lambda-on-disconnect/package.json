@@ -1,0 +1,9 @@
+{
+  "name": "lambda-on-disconnect",
+  "version": "1.0.0",
+  "description": "Lambda function triggered by the Transcribe Reader WebSocket when a user disconnects from the stream. Removes the connection ID from the DB.",
+  "main": "app.js",
+  "devDependencies": {
+    "aws-sdk": "^2.739.0"
+  }
+}

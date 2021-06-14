@@ -1,0 +1,43 @@
+worker_processes auto;
+rtmp_auto_push on;
+rtmp_auto_push_reconnect 1s;
+events {}
+rtmp {
+    server {
+        listen 1935;
+        listen [::]:1935 ipv6only=on;
+        chunk_size 4096;
+        timeout 40s;
+        ping 40s;
+        ping_timeout 20s;
+        
+        application ivs {
+            live on;
+            session_relay on;
+            drop_idle_publisher 10s;
+            idle_streams off;
+            #ivs
+            #secondary_push
+        }
+
+       application raw {
+            live on;
+            drop_idle_publisher 10s;
+            idle_streams off;
+
+            exec ffmpeg -i rtmp://127.0.0.1/raw/testkey 
+                -vcodec libx264 -preset veryfast -vprofile baseline -g 120 -tune zerolatency -x264opts 'nal-hrd=cbr:no-scenecut'
+                -b:v 6000K -maxrate 6000K -s 1920x1080 -acodec aac -ab 160k -ar 44100 -ac 1 
+                -f flv rtmp://127.0.0.1/ivs/testkey 2>>/dev/null;
+        }
+
+    }
+}
+
+http {
+    server {
+        location /control {
+            rtmp_control all;
+        }
+    }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "lambda-send-transcription",
+  "version": "1.0.0",
+  "description": "Lambda function triggered by the Transcribe Writer WebSocket when a transcription is sent. Retrieves the connection IDs from the DB and sends the transcription to all of them.",
+  "main": "app.js",
+  "devDependencies": {
+    "aws-sdk": "^2.739.0"
+  }
+}

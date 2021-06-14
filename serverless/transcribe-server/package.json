@@ -1,0 +1,11 @@
+{
+  "name": "transcribe-server",
+  "version": "1.0.0",
+  "description": "Transcribe server folder",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.8.1",
+    "@aws-sdk/client-transcribe-streaming": "^1.0.0-gamma.4",
+    "aws-sdk": "^2.864.0",
+    "ws": "^7.4.6"
+  }
+}

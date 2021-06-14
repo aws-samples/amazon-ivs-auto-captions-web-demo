@@ -1,0 +1,9 @@
+.debug-info-table tbody tr th{
+  text-align: left;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+h3 {
+  padding: 5px;
+}

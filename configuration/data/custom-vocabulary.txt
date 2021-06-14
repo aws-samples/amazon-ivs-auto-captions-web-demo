@@ -1,0 +1,4 @@
+Phrase	IPA	SoundsLike	DisplayAs
+Amazon	æ m ə z ɑ n		Amazon
+IVS	aɪ v i ɛ s		IVS
+Twitch		twitch	Twitch
