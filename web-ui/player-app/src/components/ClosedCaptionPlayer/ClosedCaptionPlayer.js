@@ -69,10 +69,10 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
   };
 
   useEffect(() => {
-    if (deviceDetect.isIOS) {
+    if (deviceDetect.isIOS && (deviceDetect.deviceType === 'mobile'|| deviceDetect.isChrome)) {
       getManifestStreamTime(isPlaying, streamUrl, player);
     }
-  }, [isPlaying, streamUrl, deviceDetect.isIOS]);
+  }, [isPlaying, streamUrl, deviceDetect.isIOS, deviceDetect.isChrome, deviceDetect.deviceType]);
 
   useEffect(() => {
     const iosLinePosition = -4;
@@ -135,7 +135,7 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
     const processTranscription = () => {
       if (transcriptionsQueue.length && isPlaying) {
         const data = transcriptionsQueue[0];
-        if (deviceDetect.isIOS) {
+        if (deviceDetect.isIOS && (deviceDetect.deviceType === 'mobile'|| deviceDetect.isChrome)) {
           showIOSCaption(data, player, showCaption, shiftTranscriptionsQueue);
           return;
         }
@@ -169,7 +169,7 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
     return () => {
       clearInterval(captionsInterval.current);
     };
-  }, [transcriptionsQueue, isPlaying, latency, deviceDetect.isIOS, showDebugInfo]);
+  }, [transcriptionsQueue, isPlaying, latency, deviceDetect.isIOS, deviceDetect.deviceType, deviceDetect.isChrome, showDebugInfo]);
 
   useEffect(() => {
     if (transcriptionErrors > 20) {
