@@ -287,6 +287,7 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
         player.current.play();
       } else {
         // User interaction is required
+        setPlaceHolderStatus('Auto-play is blocked');
         console.warn(error);
       }
     });
