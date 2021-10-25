@@ -1,6 +1,6 @@
 # Amazon IVS Auto-captions Web demo
 
-A demo web application for demonstrating how you can use Amazon IVS in conjunction with Amazon Transcribe to deliver real-time captions for live streams. This demo also shows how Amazon Translate can be used to deliver auto-translated captions to viewers.
+A demo web application for demonstrating how you can use Amazon IVS in conjunction with Amazon Transcribe to deliver real-time captions for live streams. This demo also shows how Amazon Translate can be used to deliver auto-translated captions to viewers (optional during deployment).
 
 ![Auto-captions demo](auto-captions-demo.jpg)
 
@@ -21,9 +21,8 @@ To get the demo running in your own AWS account, follow these instructions.
 3. Follow the instructions for deploying to AWS.
 
 ### Deploying to AWS
-* This demo is comprised of two parts: `serverless` (the demo backend) and `web-ui` (the demo frontend).
-* To use this demo, follow the [deployment instructions](./deployment/README.md).
-* To configure the demo (optional), follow the [configuration instructions](./configuration/README.md).
+* To configure and deploy this demo, follow the [deployment instructions](./deployment/README.md).
+* Once deployed, to configure (optional), follow the [configuration instructions](./configuration/README.md).
 
 
 <br>
