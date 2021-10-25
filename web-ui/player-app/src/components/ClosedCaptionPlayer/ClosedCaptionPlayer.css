@@ -1,5 +1,6 @@
 :root {
   --border-radius: 12px;
+  --btn-size: 3rem;
 }
 
 .stream-wrapper {
@@ -27,7 +28,7 @@
   bottom: 0;
 }
 
-.player:hover .player-ui-controls {
+.player:hover .player-ui-controls, .player:hover .player-ui__translate {
   z-index: 1;
 }
 
@@ -92,6 +93,17 @@
   user-select: none;
   cursor: pointer;
   color: white;
+  width: 3rem;
+  height: 3rem;
+}
+
+.player-ui-button:disabled{
+  opacity: 0.5;
+}
+
+.player-ui-button:focus {
+  border: 3px solid #fff;
+  border-radius: 3rem;
 }
 
 @media (max-width: 767px) {
@@ -103,6 +115,46 @@
     margin: 0;
     padding: 5px;
   }
+}
+
+.player-ui__translate {
+  position: absolute;
+  border-radius: 6px;
+  width: 180px;
+  max-height: 240px;
+  padding: 20px 0;
+  bottom: 75px;
+  right: 10px;
+  background: #000;
+  z-index: -1;
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+.player-ui__translate::-webkit-scrollbar { 
+  width: 8px; 
+}
+
+.player-ui__translate::-webkit-scrollbar-track {
+  height: 10px;
+}
+
+.player-ui__translate::-webkit-scrollbar-thumb {
+  background-color: white;   
+  border-radius: 20px;        
+}
+
+.player-ui-lineBorder {
+  color : white;
+  cursor:pointer;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  list-style:none;
+  text-align: center;
+}
+
+.player-ui-lineBorder:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .player-debug {
@@ -131,4 +183,23 @@
 
 .player-settings h3, .player-settings h4, .player-settings .close-icon {
   color: #EB5F07;
+}
+
+.captions-options-icon {
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+  color: white;
+  transition: transform 0.15s ease-in-out;
+}
+
+video.video-fontsize-reduce::-webkit-media-text-track-display {
+  font-size: 70%;
+}
+
+video.video-fontsize-reduce-firefox::cue {
+  font-size: 190%;
 }

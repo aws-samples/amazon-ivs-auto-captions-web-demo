@@ -18,7 +18,8 @@
     "build:prod": "env-cmd -f .env.prod react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "linter": "npx semistandard"
+    "linter": "npx semistandard",
+    "linter-fix": "npx semistandard --fix"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -30,9 +30,23 @@ const REACT_APP_STREAM_PLAYBACK_URL = findOutput(
   'StreamPlaybackURL'
 );
 
+// Get value for CaptionsTranslationsLanguageCodes key
+const REACT_APP_CAPTIONS_TRANSLATIONS_LANGUAGE_CODES = findOutput(
+  cloudformationOutputs,
+  'CaptionsTranslationsLanguageCodes'
+);
+
+// Get value for EnableTranslate key
+const REACT_APP_ENABLE_TRANSLATE = findOutput(
+  cloudformationOutputs,
+  'EnableTranslate'
+);
+
 // Create .env file with environment variables
 let envFile = `REACT_APP_WS_CAPTIONS_URL=${REACT_APP_WS_CAPTIONS_URL}\n`;
-envFile += `REACT_APP_STREAM_PLAYBACK_URL=${REACT_APP_STREAM_PLAYBACK_URL}`;
+envFile += `REACT_APP_STREAM_PLAYBACK_URL=${REACT_APP_STREAM_PLAYBACK_URL}\n`;
+envFile += `REACT_APP_ENABLE_TRANSLATE=${REACT_APP_ENABLE_TRANSLATE}\n`;
+envFile += `REACT_APP_CAPTIONS_TRANSLATIONS_LANGUAGE_CODES=${REACT_APP_CAPTIONS_TRANSLATIONS_LANGUAGE_CODES}`;
 
 // Write .env file
 fs.writeFileSync(pathEnvFile, envFile);

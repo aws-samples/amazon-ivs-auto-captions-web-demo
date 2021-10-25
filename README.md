@@ -30,13 +30,41 @@ To get the demo running in your own AWS account, follow these instructions.
 
 ## Architecture
 
-![architecture](architecture.png)
+![architecture](architecture.jpg)
 
 <br>
 
 ## Known issues and limitations
-* The application was written for demonstration purposes and not for production use.
+* The application was written for demonstration purposes and not for production use. Current solution has a maximum limit of 200 users connected at the same time to a given stream with the same captions language selected. Starting from 200 connected users and up, the execution time of the query to get the connections to deliver the captions in that specific language is increased, adding latency to captions visualization until the query execution time causes a timeout in the Lambda function (which is set at 3 seconds), resulting in no captions being seen at all.
 * Currently only tested in **us-west-2 (Oregon)** and **us-east-1 (N. Virginia)** regions. Additional regions may be supported depending on service availability.
+* In Firefox, the captions appear very near the bottom border of the video when there are 4 or more rows to be displayed.  
+
+<br>
+
+## Estimated costs
+Deploying this demo application in your AWS account will create and consume AWS resources, which will cost money. 
+
+Below is a table with estimated costs for scenarios with 1, 10, and 100 viewers, each receiving video in 1080p resolution during 1 hour with four translations enabled.
+
+> Note: These costs are estimates. Cost may vary depending on multiple factors such as (but not limited to) region, amount of viewers, duration, number of captions in the video, enabling the Translate feature, the number of translations that are activated, etc. Note that the estimated prices are in dollars and do not include taxes.
+
+<br>
+
+| Service                                                              | 1 viewer | 10 viewers | 100 viewers |
+| -------------------------------------------------------------------- | -------: | ---------: | ----------: |
+| [Amazon Translate](https://aws.amazon.com/translate/pricing/)               |    30.78 |      30.78 |       30.78 |
+| [Elastic Container Service](https://aws.amazon.com/fargate/pricing/) |     2.27 |       2.27 |        2.27 |
+| [Interactive Video Service](https://aws.amazon.com/ivs/pricing/)     |     2.15 |        3.5 |          17 |
+| [Transcribe](https://aws.amazon.com/transcribe/pricing/)             |     0.73 |       0.73 |        0.73 |
+| [CloudWatch](https://aws.amazon.com/cloudwatch/pricing/)             |     0.09 |       0.09 |        0.09 |
+| [DynamoDB](https://aws.amazon.com/dynamodb/pricing/on-demand/)       |     0.02 |       0.25 |         2.5 |
+| [API Gateway](https://aws.amazon.com/api-gateway/pricing/)           |     0.02 |       0.25 |         2.5 |
+| [Elastic Container Registry](https://aws.amazon.com/ecr/pricing/)    |     0.09 |       0.09 |        0.09 |
+| [Lambda](https://aws.amazon.com/lambda/pricing/)                     |     0.00 |       0.02 |        0.25 |
+| [S3](https://aws.amazon.com/s3/pricing/)                             |     0.00 |       0.00 |        0.00 |
+| [CloudFront](https://aws.amazon.com/cloudfront/pricing/)             |     0.00 |       0.00 |        0.02 |
+| Total estimated cost                                                           |    36.15 |      37.98 |       56.23 |
+
 
 <br>
 
@@ -47,4 +75,3 @@ To get the demo running in your own AWS account, follow these instructions.
 * [API Reference](https://docs.aws.amazon.com/ivs/latest/APIReference/)
 * [Learn more about Amazon IVS on IVS.rocks](https://ivs.rocks/)
 * [View more demos like this](https://ivs.rocks/examples)
-  

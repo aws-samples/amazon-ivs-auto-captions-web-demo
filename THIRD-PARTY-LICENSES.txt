@@ -23,16 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 **The following vector assets are used under Apache License 2.0 (reproduced below).
-/web-ui/player-app/assets/icons/close.svg
-/web-ui/player-app/assets/icons/closed_caption_disabled.svg
-/web-ui/player-app/assets/icons/closed_caption.svg
-/web-ui/player-app/assets/icons/fullscreen-exit.svg
-/web-ui/player-app/assets/icons/fullscreen.svg
-/web-ui/player-app/assets/icons/more_vert.svg
-/web-ui/player-app/assets/icons/pause.svg
-/web-ui/player-app/assets/icons/play_arrow.svg
-/web-ui/player-app/assets/icons/volume_off.svg
-/web-ui/player-app/assets/icons/volume_up.svg
+/web-ui/player-app/src/assets/icons/close.svg
+/web-ui/player-app/src/assets/icons/closed_caption_disabled.svg
+/web-ui/player-app/src/assets/icons/closed_caption.svg
+/web-ui/player-app/src/assets/icons/fullscreen-exit.svg
+/web-ui/player-app/src/assets/icons/fullscreen.svg
+/web-ui/player-app/src/assets/icons/more_vert.svg
+/web-ui/player-app/src/assets/icons/pause.svg
+/web-ui/player-app/src/assets/icons/play_arrow.svg
+/web-ui/player-app/src/assets/icons/volume_off.svg
+/web-ui/player-app/src/assets/icons/volume_up.svg
+/web-ui/player-app/src/assets/icons/large_play_arrow.svg
+/web-ui/player-app/src/assets/icons/subtitles.svg
 
 Apache License 2.0
 

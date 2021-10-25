@@ -5,19 +5,11 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/transcribe-dev",
+          "awslogs-group": "/ecs/ivs-transcribe-demo-transcribe-logs-dev",
           "awslogs-region": "<AWS_REGION>",
-          "awslogs-stream-prefix": "ecs",
-          "awslogs-create-group": "true"
+          "awslogs-stream-prefix": "ecs"
         }
       },
-      "portMappings": [
-        {
-          "hostPort": 22,
-          "protocol": "tcp",
-          "containerPort": 22
-        }
-      ],
       "cpu": 0,
       "secrets": [
         {
@@ -31,10 +23,6 @@
         {
           "name": "RTMP_INPUT",
           "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/ivs/dev/rtmp_input"
-        },
-        {
-          "name": "SSH_PUBLIC_KEY",
-          "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/ivs/dev/ssh_public_key"
         }
       ],
       "environment": [
@@ -48,22 +36,26 @@
         },
         {
           "name": "VOCABULARY_NAME",
-          "value": "ivs-en-us-custom-vocabulary-dev"
+          "value": "ivs-transcribe-demo-custom-vocabulary-dev"
         },
         {
           "name": "VOCABULARY_FILTER",
-          "value": "ivs-en-us-vocabulary-filter-dev"
+          "value": "ivs-transcribe-demo-vocabulary-filter-dev"
+        },
+        {
+          "name": "KEYWORDS_TABLE_NAME",
+          "value": "ivs-transcribe-demo-overlays-dev"
         }
       ],
       "memoryReservation": 512,
       "volumesFrom": [],
-      "image": "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/ivs-transcribe-dev",
-      "name": "transcribe-dev"
+      "image": "placeholder-to-be-replaced-by-cd-pipeline",
+      "name": "ivs-transcribe-demo-transcribe-container-definition-dev"
     }
   ],
   "memory": "1024",
   "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ECSTranscriberTaskIAMRole",
-  "family": "transcribe-task-dev",
+  "family": "ivs-transcribe-demo-transcribe-task-definition-dev",
   "requiresCompatibilities": ["FARGATE"],
   "networkMode": "awsvpc",
   "cpu": "512"

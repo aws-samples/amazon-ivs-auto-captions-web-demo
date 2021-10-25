@@ -14,7 +14,7 @@ const setOnMessageListener = (socket, isDebugMode, onMessage) => {
   const listenerDebugOn = (event) => {
     try {
       const data = JSON.parse(event.data);
-      console.log('[Websockets message] Data received from server:', data);
+      console.log('[Websocket message] Data received from server:', data);
       onMessage(data);
     } catch (err) {
       console.log(err);
@@ -41,22 +41,22 @@ const createSocket = (url, isDebugMode, onMessage) => {
     socket = new WebSocket(url);
 
     socket.onopen = () => {
-      console.info('[Websockets open] Websockets connection established');
+      console.info(`[Websocket onopen event] Connected to URL: ${url}`);
     };
 
     setOnMessageListener(socket, isDebugMode, onMessage);
 
     socket.onclose = (event) => {
       if (event.wasClean) {
-        console.info(`[Websockets close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+        console.info(`[Websocket onclose event] Connection closed cleanly:\n* url=${url}\n* code=${event.code}\n* reason=${event.reason}`);
       } else {
-        console.info('[Websockets close] Connection died');
+        console.info('[Websocket onclose event] Connection died');
         setTimeout(() => createSocket(url, isDebugMode, onMessage), 100);
       }
     };
 
     socket.onerror = (error) => {
-      console.error('[Websockets error]', error);
+      console.error('[Websocket onerror event]', error);
     };
   } catch (err) {
     console.error(`[Websockets exception] ${err.message}`);

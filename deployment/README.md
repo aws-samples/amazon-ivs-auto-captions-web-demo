@@ -21,7 +21,11 @@ This will generate a 6 character length alphanumeric value. Then, it will update
 
 Run `aws configure` to set your credentials and the region where you want the demo resources deployed.
 
-### 3) Run deployment script
+### 3) Configure translate languages (optional)
+
+When the deployment script starts execution, you will be prompted for confirmation on whether to enable the **Translate** feature or not. If enabled, other captions languages besides English can be selected when visualizing the stream through the Player. Any [Amazon Translate](https://docs.aws.amazon.com/translate/latest/dg/what-is.html) supported language can be enabled by updating the [Translate Languages file](./translate-languages.json) and setting the desired translation languages value to **true**. If the Translate feature is enabled and no language has been enabled in the file, the **Spanish** translation will be made available by default.
+
+### 4) Run deployment script
 
 Run `bash deploy.sh`.
 

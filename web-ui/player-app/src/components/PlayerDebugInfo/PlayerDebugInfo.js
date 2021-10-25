@@ -1,13 +1,22 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import './PlayerDebugInfo.css';
 
+const deviceDetect = require('react-device-detect');
+
 const PlayerDebugInfo = ({ player }) => {
   const interval = useRef(null);
 
   const debugInfoReducer = (state, action) => {
+    let playerLiveLatency;
+    if (deviceDetect.isOpera) {
+      playerLiveLatency = player.isLiveLowLatency() ? 2 : 4;
+    } else {
+      playerLiveLatency = player.getLiveLatency();
+    }
+
     if (action === 'updateDebugInfo') {
       return {
-        latency: `${player.getLiveLatency().toFixed(2)} sec`,
+        latency: `${playerLiveLatency.toFixed(2)} sec`,
         isLowLatency: player.isLiveLowLatency() ? 'Yes' : 'No',
         position: `${Math.ceil(player.getPosition())} sec`,
         startOffset: `${Math.ceil(player.getStartOffset())} sec`,

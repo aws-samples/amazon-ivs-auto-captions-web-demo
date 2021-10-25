@@ -45,6 +45,11 @@ const generateOutput = async () => {
             'StreamServiceName'
         );
 
+        const streamKey = findOutput(
+            cloudformationOutputs,
+            'StreamKey'
+        );
+
         // Get Stream service task public IP
         AWS.config.update({ region: awsRegion });
         const ecs = new AWS.ECS();
@@ -75,7 +80,7 @@ const output = `
 Amazon IVS Transcribe demo
 
 * Stream Server URL = ${streamServerUrl}
-* Stream Key = testkey
+* Stream Key = ${streamKey}
 * Player URL = https://${playerAppUrl}
 `;
         console.log('\x1b[33m%s\x1b[0m', output);

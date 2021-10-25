@@ -5,10 +5,9 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/stream-prod",
+          "awslogs-group": "/ecs/ivs-transcribe-demo-stream-logs-prod",
           "awslogs-region": "<AWS_REGION>",
-          "awslogs-stream-prefix": "ecs",
-          "awslogs-create-group": "true"
+          "awslogs-stream-prefix": "ecs"
         }
       },
       "portMappings": [
@@ -26,11 +25,6 @@
           "hostPort": 80,
           "protocol": "tcp",
           "containerPort": 80
-        },
-        {
-          "hostPort": 22,
-          "protocol": "tcp",
-          "containerPort": 22
         }
       ],
       "cpu": 0,
@@ -46,13 +40,13 @@
       ],
       "memoryReservation": 512,
       "volumesFrom": [],
-      "image": "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/ivs-stream-prod",
-      "name": "stream-prod"
+      "image": "placeholder-to-be-replaced-by-cd-pipeline",
+      "name": "ivs-transcribe-demo-stream-container-definition-prod"
     }
   ],
   "memory": "4096",
   "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ECSTranscriberTaskIAMRole",
-  "family": "stream-task-prod",
+  "family": "ivs-transcribe-demo-stream-task-definition-prod",
   "requiresCompatibilities": ["FARGATE"],
   "networkMode": "awsvpc",
   "cpu": "2048"

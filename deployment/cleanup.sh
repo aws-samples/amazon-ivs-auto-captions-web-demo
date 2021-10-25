@@ -7,6 +7,7 @@ PLAYER_BUCKET=s3://ivs-transcribe-demo-player-app-<RANDOM_SUFFIX>
 LAMBDA_FUNCTIONS_BUCKET=s3://ivs-transcribe-demo-lambda-functions-<RANDOM_SUFFIX>
 STREAM_REPOSITORY_NAME=ivs-transcribe-demo-stream-images-<RANDOM_SUFFIX>
 TRANSCRIBE_REPOSITORY_NAME=ivs-transcribe-demo-transcribe-images-<RANDOM_SUFFIX>
+TRANSLATE_REPOSITORY_NAME=ivs-transcribe-demo-translate-images-<RANDOM_SUFFIX>
 VOCABULARY_NAME=ivs-transcribe-demo-custom-vocabulary-<RANDOM_SUFFIX>
 VOCABULARY_FILTER_NAME=ivs-transcribe-demo-vocabulary-filter-<RANDOM_SUFFIX>
 
@@ -34,6 +35,16 @@ aws ecr delete-repository --repository-name $STREAM_REPOSITORY_NAME --force
 
 printf "\nRemoving ECR repository \"$TRANSCRIBE_REPOSITORY_NAME\"...\n"
 aws ecr delete-repository --repository-name $TRANSCRIBE_REPOSITORY_NAME --force
+
+printf "\nChecking if translate ECR repository exists: \"$TRANSLATE_REPOSITORY_NAME\"\n"
+aws ecr describe-repositories --repository-names $TRANSLATE_REPOSITORY_NAME &> /dev/null
+if [[ $? == 0 ]]
+then
+    printf "\nRepository found, removing...\n"
+    aws ecr delete-repository --repository-name $TRANSLATE_REPOSITORY_NAME --force
+    else
+    printf "\nRepository not found, skipped\n"
+fi
 
 printf "\nRemoving Transcribe custom vocabulary \"$VOCABULARY_NAME\"...\n"
 aws transcribe delete-vocabulary --vocabulary-name $VOCABULARY_NAME

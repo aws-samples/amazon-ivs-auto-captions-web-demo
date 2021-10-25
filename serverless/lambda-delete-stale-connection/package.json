@@ -1,0 +1,9 @@
+{
+  "name": "delete-stale-connection",
+  "version": "1.0.0",
+  "description": "Lambda function triggered by the 'send transcription' & 'send transcription chunks' lambdas, used to delete the stale connections in the database.",
+  "main": "app.js",
+  "devDependencies": {
+    "aws-sdk": "^2.739.0"
+  }
+}

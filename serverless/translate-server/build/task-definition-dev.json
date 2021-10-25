@@ -1,0 +1,39 @@
+{
+    "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+      {
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/ivs-transcribe-demo-translate-logs-dev",
+            "awslogs-region": "<AWS_REGION>",
+            "awslogs-stream-prefix": "ecs"
+          }
+        },
+        "cpu": 0,
+        "secrets": [
+          {
+            "name": "AWS_GW_WS",
+            "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/ivs/dev/aws_gw_ws"
+          }
+        ],
+        "environment": [
+          {
+            "name": "AWS_REGION",
+            "value": "<AWS_REGION>"
+          }
+        ],
+        "memoryReservation": 256,
+        "volumesFrom": [],
+        "image": "placeholder-to-be-replaced-by-cd-pipeline",
+        "name": "ivs-transcribe-demo-translate-container-definition-dev"
+      }
+    ],
+    "memory": "512",
+    "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ECSTranscriberTaskIAMRole",
+    "family": "ivs-transcribe-demo-translate-task-definition-dev",
+    "requiresCompatibilities": ["FARGATE"],
+    "networkMode": "awsvpc",
+    "cpu": "256"
+  }
+  

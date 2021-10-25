@@ -8,3 +8,5 @@ export { ReactComponent as Settings } from './more_vert.svg';
 export { ReactComponent as Close } from './close.svg';
 export { ReactComponent as Fullscreen } from './fullscreen.svg';
 export { ReactComponent as ExitFullscreen } from './fullscreen-exit.svg';
+export { ReactComponent as Translate } from './subtitles.svg';
+export { ReactComponent as LargePlay } from './large_play_arrow.svg';

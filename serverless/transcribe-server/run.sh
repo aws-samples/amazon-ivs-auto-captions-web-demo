@@ -34,10 +34,16 @@ do
 
   feed_time=$(ffprobe -v error -show_entries format=start_time -of default=noprint_wrappers=1:nokey=1 $RTMP_INPUT)
   printf "feed_time value: ${feed_time}"
-  
+
+  if [ ! -z "${feed_time}" ]
+  then
   ffmpeg -i $RTMP_INPUT -tune zerolatency -muxdelay 0 -af "afftdn=nf=-20, highpass=f=200, lowpass=f=3000" -vn -sn -dn -f wav -ar 16000 -ac 1 - 2>/dev/null | node src/transcribe.js $feed_time
 
-  echo "Loop finish"
+  else
+  echo "FFprobe returned null as a feed time."
+  
+  fi
 
+  echo "Loop finish"
   sleep 3
 done

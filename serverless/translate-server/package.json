@@ -1,0 +1,9 @@
+{
+  "name": "translate-server",
+  "version": "1.0.0",
+  "description": "Translate server folder",
+  "dependencies": {
+    "aws-sdk": "^2.864.0",
+    "ws": "^7.4.6"
+  }
+}

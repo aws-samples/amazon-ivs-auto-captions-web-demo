@@ -22,22 +22,29 @@ RUN mkdir -p /tmp/build/nginx-rtmp-module && \
     tar -zxf nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}.tar.gz && \
     cd nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}
 
+# Download and decompress PCRE
+RUN mkdir -p /tmp/build/pcre && \
+    cd /tmp/build/pcre && \
+    wget https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz && \
+    tar -zxf pcre-8.44.tar.gz
+
 # Build and install Nginx
 # The default puts everything under /usr/local/nginx, so it's needed to change
 # it explicitly. Not just for order but to have it in the PATH
 RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
     ./configure \
-        --sbin-path=/usr/local/sbin/nginx \
-        --conf-path=/etc/nginx/nginx.conf \
-        --error-log-path=/var/log/nginx/error.log \
-        --pid-path=/var/run/nginx/nginx.pid \
-        --lock-path=/var/lock/nginx/nginx.lock \
-        --http-log-path=/var/log/nginx/access.log \
-        --http-client-body-temp-path=/tmp/nginx-client-body \
-        --with-http_ssl_module \
-        --with-threads \
-        --with-ipv6 \
-        --add-module=/tmp/build/nginx-rtmp-module/nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION} && \
+    --sbin-path=/usr/local/sbin/nginx \
+    --conf-path=/etc/nginx/nginx.conf \
+    --error-log-path=/var/log/nginx/error.log \
+    --pid-path=/var/run/nginx/nginx.pid \
+    --lock-path=/var/lock/nginx/nginx.lock \
+    --http-log-path=/var/log/nginx/access.log \
+    --http-client-body-temp-path=/tmp/nginx-client-body \
+    --with-pcre=/tmp/build/pcre/pcre-8.44 \
+    --with-http_ssl_module \
+    --with-threads \
+    --with-ipv6 \
+    --add-module=/tmp/build/nginx-rtmp-module/nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION} && \
     make -j $(getconf _NPROCESSORS_ONLN) && \
     make install && \
     mkdir /var/lock/nginx && \
@@ -48,7 +55,6 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
 # Set up config file
-COPY nginx/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Config Stunnel
@@ -73,10 +79,15 @@ ENV DEBUG ""
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
+COPY validation-server /etc/validation-server
+RUN cd /etc/validation-server && npm i
+
 RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 1935
 
 ENTRYPOINT ["sh","/docker-entrypoint.sh"]
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD nginx -g 'daemon off;' & node /etc/validation-server/index.js
