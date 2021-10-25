@@ -1,6 +1,6 @@
 # Amazon IVS Auto-captions Web demo
 
-A demo web application for demonstrating how you can use Amazon IVS in conjunction with Amazon Transcribe to deliver real-time captions for live streams.
+A demo web application for demonstrating how you can use Amazon IVS in conjunction with Amazon Transcribe to deliver real-time captions for live streams. This demo also shows how Amazon Translate can be used to deliver auto-translated captions to viewers.
 
 ![Auto-captions demo](auto-captions-demo.jpg)
 
@@ -35,9 +35,10 @@ To get the demo running in your own AWS account, follow these instructions.
 <br>
 
 ## Known issues and limitations
-* The application was written for demonstration purposes and not for production use. Current solution has a maximum limit of 200 users connected at the same time to a given stream with the same captions language selected. Starting from 200 connected users and up, the execution time of the query to get the connections to deliver the captions in that specific language is increased, adding latency to captions visualization until the query execution time causes a timeout in the Lambda function (which is set at 3 seconds), resulting in no captions being seen at all.
+* The application was written for demonstration purposes and not for production use.
 * Currently only tested in **us-west-2 (Oregon)** and **us-east-1 (N. Virginia)** regions. Additional regions may be supported depending on service availability.
-* In Firefox, the captions appear very near the bottom border of the video when there are 4 or more rows to be displayed.  
+* Current solution has a maximum limit of 200 users connected at the same time to a given stream with the same captions language selected. Starting from 200 connected users and up, the execution time of the query to get the connections to deliver the captions in that specific language is increased, adding latency to captions visualization until the query execution time causes a timeout in the Lambda function (which is set at 3 seconds), resulting in no captions being seen at all.
+* In Firefox, captions may appear very close to the bottom border of the video when there are 4 or more rows of captions.  
 
 <br>
 
