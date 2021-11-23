@@ -1,9 +1,0 @@
-{
-  "name": "lambda-on-connect",
-  "version": "1.0.0",
-  "description": "Lambda function triggered by the Transcribe Reader WebSocket when a user connects to the stream. Saves the connection ID into the DB.",
-  "main": "app.js",
-  "devDependencies": {
-    "aws-sdk": "^2.739.0"
-  }
-}

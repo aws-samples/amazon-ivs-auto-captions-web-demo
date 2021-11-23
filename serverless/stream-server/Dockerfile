@@ -22,12 +22,6 @@ RUN mkdir -p /tmp/build/nginx-rtmp-module && \
     tar -zxf nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}.tar.gz && \
     cd nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}
 
-# Download and decompress PCRE
-RUN mkdir -p /tmp/build/pcre && \
-    cd /tmp/build/pcre && \
-    wget https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz && \
-    tar -zxf pcre-8.44.tar.gz
-
 # Build and install Nginx
 # The default puts everything under /usr/local/nginx, so it's needed to change
 # it explicitly. Not just for order but to have it in the PATH
@@ -40,7 +34,6 @@ RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
     --lock-path=/var/lock/nginx/nginx.lock \
     --http-log-path=/var/log/nginx/access.log \
     --http-client-body-temp-path=/tmp/nginx-client-body \
-    --with-pcre=/tmp/build/pcre/pcre-8.44 \
     --with-http_ssl_module \
     --with-threads \
     --with-ipv6 \

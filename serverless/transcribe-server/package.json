@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Transcribe server folder",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.8.1",
-    "@aws-sdk/client-transcribe-streaming": "^3.25.0",
-    "aws-sdk": "^2.864.0",
-    "ws": "^7.4.6"
+    "@aws-sdk/client-dynamodb": "^3.42.0",
+    "@aws-sdk/client-transcribe-streaming": "^3.40.0",
+    "aws-sdk": "^2.1034.0",
+    "ws": "^8.2.3"
   }
 }

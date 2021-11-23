@@ -1,9 +1,0 @@
-{
-  "name": "lambda-send-transcription-chunks",
-  "version": "1.0.0",
-  "description": "Lambda function triggered by the send transcription lambda, used to send transcriptions to clients in chunks",
-  "main": "app.js",
-  "devDependencies": {
-    "aws-sdk": "^2.739.0"
-  }
-}
