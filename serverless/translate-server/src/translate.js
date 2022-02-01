@@ -6,7 +6,7 @@ const {
   AWS_TRANSLATE_PORT,
   CAPTIONS_TRANSLATIONS_LANGUAGE_CODES,
   WRITER_WEBSOCKET_SENDTRANSCRIPTION_ROUTE,
-  DEFAULT_SOURCE_LANGUAGE_CODE,
+  AUDIO_LANGUAGE_CODE,
 } = require("./constants");
 
 const WebSocketManager = require("./utils/webSocketManager");
@@ -28,7 +28,7 @@ console.log("Languages to translate to: ", translationsLanguageCodes);
 const processTranslation = async (transcriptData, targetLanguageCode) => {
   try {
     const translateRequest = translateClient.translateText({
-      SourceLanguageCode: DEFAULT_SOURCE_LANGUAGE_CODE,
+      SourceLanguageCode: AUDIO_LANGUAGE_CODE,
       TargetLanguageCode: targetLanguageCode,
       Text: transcriptData.text,
     });

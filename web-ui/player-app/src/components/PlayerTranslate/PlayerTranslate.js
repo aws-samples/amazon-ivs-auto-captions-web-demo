@@ -3,12 +3,11 @@ import config from '../../config';
 import languageMappings from '../../assets/translate-options-mapping.json';
 import './PlayerTranslate.css';
 
-const DEFAULT_CAPTIONS_LANGUAGE_CODE = 'en';
 const VISIBLE_OPTIONS = 4;
 
 const PlayerTranslate = ({ selectedLanguage, onLanguageSelected }) => {
   const translationLanguages = config.CAPTIONS_TRANSLATIONS_LANGUAGE_CODES.split('-') || [];
-  const captionsLanguages = [DEFAULT_CAPTIONS_LANGUAGE_CODE]
+  const captionsLanguages = [config.AUDIO_LANGUAGE_CODE]
     .concat(translationLanguages)
     .filter((l) => l !== '');
   const playerUI = useRef(null);

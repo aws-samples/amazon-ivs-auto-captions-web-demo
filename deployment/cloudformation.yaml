@@ -11,6 +11,16 @@ Parameters:
     AllowedValues:
       - 'true'
       - 'false'
+
+  AudioLanguageCode:
+    Type: String
+    Description: ISO 639-1 code of the audio language to be transcribed
+    Default: en
+
+  AudioLanguageTranscribeCode:
+    Type: String
+    Description: Amazon Transcribe code of the audio language to be transcribed
+    Default: en-US  
     
   # Lambda functions parameters
   LambdaOnConnectFunctionName:
@@ -626,8 +636,10 @@ Resources:
           Environment:
             - Name: AWS_REGION
               Value: !Sub '${AWS::Region}'
-            - Name: LANGUAGE_CODE
-              Value: 'en-US'
+            - Name: AUDIO_LANGUAGE_TRANSCRIBE_CODE
+              Value: !Ref AudioLanguageTranscribeCode
+            - Name: AUDIO_LANGUAGE_CODE
+              Value: !Ref AudioLanguageCode
             - Name: VOCABULARY_NAME
               Value: !Ref TranscribeCustomVocabularyName
             - Name: VOCABULARY_FILTER
@@ -694,6 +706,8 @@ Resources:
               Value: !Sub '${AWS::Region}'
             - Name: AWS_GW_WS
               Value: !Join [ "/", [ !GetAtt WriterWebSocket.ApiEndpoint, !Ref WriterWebSocketStage ] ]
+            - Name: AUDIO_LANGUAGE_CODE
+              Value: !Ref AudioLanguageCode  
             - Name: CAPTIONS_TRANSLATIONS_LANGUAGE_CODES
               Value: !Ref TranslateServiceTranslationsLanguageCodes
           Cpu: 0
@@ -1013,3 +1027,6 @@ Outputs:
   
   StreamKey:
     Value: !Sub streamkey-${AWS::StackName}-<RANDOM_SUFFIX>
+
+  AudioLanguageCode:
+    Value: !Ref AudioLanguageCode

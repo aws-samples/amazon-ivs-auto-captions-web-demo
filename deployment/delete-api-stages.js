@@ -1,6 +1,6 @@
 const fs = require("fs");
 const AWS = require("aws-sdk");
-const { stackOutputFilePath } = require("minimist")(process.argv.slice(2));
+const { stackName, stackOutputFilePath } = require("minimist")(process.argv.slice(2));
 
 // Validate args
 if (!stackOutputFilePath) {
@@ -17,10 +17,15 @@ const findOutput = (outputs, key) => {
 
 const deleteStages = async () => {
     try {
-        console.info("\n\nDeleting API Gateway stages...");
-
         // Read stack.json file and get outputs section
         const stackInfo = JSON.parse(fs.readFileSync(stackOutputFilePath, "utf8"));
+        const stackNameInOutputFile = stackInfo.Stacks[0].StackName;
+
+        if (stackName != stackNameInOutputFile) {
+            console.error(`\n\nSubmitted stack name ("${stackName}") is not equal to stack name in stack.json file ("${stackNameInOutputFile}"), aborting API Gateway stage deletion...`);
+            process.exit(2);
+        }
+
         const cloudformationOutputs = stackInfo.Stacks[0].Outputs;
 
         // Get necessary values from stack output file

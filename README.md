@@ -37,7 +37,7 @@ To get the demo running in your own AWS account, follow these instructions.
 * The application was written for demonstration purposes and not for production use.
 * Currently only tested in **us-west-2 (Oregon)** and **us-east-1 (N. Virginia)** regions. Additional regions may be supported depending on service availability.
 * Current solution has a maximum limit of 200 users connected at the same time to a given stream with the same captions language selected. Starting from 200 connected users and up, the execution time of the query to get the connections to deliver the captions in that specific language is increased, adding latency to captions visualization until the query execution time causes a timeout in the Lambda function (which is set at 3 seconds), resulting in no captions being seen at all.
-* In Firefox, captions may appear very close to the bottom border of the video when there are 4 or more rows of captions.  
+* In Firefox, captions may appear very close to the bottom border of the video when there are 4 or more rows of captions.
 
 <br>
 

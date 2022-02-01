@@ -21,7 +21,8 @@ aws s3 rm $PLAYER_BUCKET --recursive --quiet
 
 # Remove stages to avoid error when deleting APIs:
 # "Active stages pointing to this deployment must be moved or deleted"
-node delete-api-stages.js --stackOutputFilePath stack.json
+printf "\nRemoving API Gateway stages...\n"
+node delete-api-stages.js --stackName $STACKNAME --stackOutputFilePath stack.json
 
 printf "\nRemoving stack \x1b[33m$STACKNAME\x1b[0m...\n"
 aws cloudformation delete-stack --stack-name $STACKNAME

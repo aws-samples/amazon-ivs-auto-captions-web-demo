@@ -42,11 +42,18 @@ const REACT_APP_ENABLE_TRANSLATE = findOutput(
   'EnableTranslate'
 );
 
+// Get value for AudioLanguageCode key
+const REACT_APP_AUDIO_LANGUAGE_CODE = findOutput(
+  cloudformationOutputs,
+  'AudioLanguageCode'
+);
+
 // Create .env file with environment variables
 let envFile = `REACT_APP_WS_CAPTIONS_URL=${REACT_APP_WS_CAPTIONS_URL}\n`;
 envFile += `REACT_APP_STREAM_PLAYBACK_URL=${REACT_APP_STREAM_PLAYBACK_URL}\n`;
+envFile += `REACT_APP_CAPTIONS_TRANSLATIONS_LANGUAGE_CODES=${REACT_APP_CAPTIONS_TRANSLATIONS_LANGUAGE_CODES}\n`;
 envFile += `REACT_APP_ENABLE_TRANSLATE=${REACT_APP_ENABLE_TRANSLATE}\n`;
-envFile += `REACT_APP_CAPTIONS_TRANSLATIONS_LANGUAGE_CODES=${REACT_APP_CAPTIONS_TRANSLATIONS_LANGUAGE_CODES}`;
+envFile += `REACT_APP_AUDIO_LANGUAGE_CODE=${REACT_APP_AUDIO_LANGUAGE_CODE}`;
 
 // Write .env file
 fs.writeFileSync(pathEnvFile, envFile);

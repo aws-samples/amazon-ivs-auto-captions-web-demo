@@ -36,12 +36,11 @@ const getManifestStreamTime = (isPlaying, streamUrl, player) => {
       // The position varies if the stream just started or not. Depending on that the difference changes
       const difference = player.current.getPosition() > defaultPlayerPosition ? differenceWithLongStreamTime : differenceWithShortStreamTime;
       _startOffset = Number(value) - player.current.getPosition() - difference;
-      console.info('Stream Time Updated -> ' + _startOffset);
 
       return _startOffset;
     });
   }).catch(function (error) {
-    console.log("Couldn't get information about stream time. Error details: ", error);
+    console.error("Couldn't get information about stream time. Error details: ", error);
   });
 };
 

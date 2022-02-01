@@ -5,7 +5,8 @@ const {
 
 const {
     AWS_REGION,
-    LANGUAGE_CODE,
+    AUDIO_LANGUAGE_TRANSCRIBE_CODE,
+    AUDIO_LANGUAGE_CODE,
     VOCABULARY_FILTER,
     MEDIA_SAMPLE_RATE_HERTZ,
     VOCABULARY_NAME,
@@ -15,7 +16,6 @@ const {
     VOCABULARY_FILTER_METHOD,
     MEDIA_ENCODING,
     WRITER_WEBSOCKET_SENDTRANSCRIPTION_ROUTE,
-    DEFAULT_LANGUAGE_CODE,
     SUCCESS_EXIT_CODE,
     ERROR_EXIT_CODE,
     TWO_ROW_CHARACTER_COUNT
@@ -40,7 +40,8 @@ if (TRANSLATE_ENABLED == 'true') {
 let overlaysInformation = null;
 let endTimePrev = null;
 let feedTime = process.argv[2];
-let previousSentCaptionEndTime = 0;
+let previousSentCaptionEndTimeTranscribe = 0;
+let previousSentCaptionEndTimeTranslate = 0;
 
 const streamAudioToWebSocket = async function () {
     process.stdin._writableState.highWaterMark = 4096; // Read with chunk size of 3200 as the audio is 16kHz linear PCM
@@ -58,7 +59,7 @@ const streamAudioToWebSocket = async function () {
     });
 
     const startStreamTranscriptionCommand = new StartStreamTranscriptionCommand({
-        LanguageCode: LANGUAGE_CODE,
+        LanguageCode: AUDIO_LANGUAGE_TRANSCRIBE_CODE,
         VocabularyName: VOCABULARY_NAME,
         VocabularyFilterName: VOCABULARY_FILTER,
         VocabularyFilterMethod: VOCABULARY_FILTER_METHOD,
@@ -79,42 +80,30 @@ const streamAudioToWebSocket = async function () {
         
         if (transcriptionEvent.TranscriptEvent.Transcript) {
             const results = transcriptionEvent.TranscriptEvent.Transcript.Results;
-            metadataManager.sendOverlaysMetadata(results, overlaysInformation);
-
             const parsedTranscription = parseTranscription(results);
 
             if (parsedTranscription) {
 
-                // only format captions for transcriptions that are sent directly to the writer websocket,
-                // captions for transcriptions that are going to be translated will be formatted later
-                const parsedTranscriptionWithCaptionsFormatted = formatCaptions(parsedTranscription);
+                let caption;
 
-                const payload = {
-                    action: WRITER_WEBSOCKET_SENDTRANSCRIPTION_ROUTE,
-                    data: parsedTranscriptionWithCaptionsFormatted,
-                    lang: DEFAULT_LANGUAGE_CODE,
-                };
-
-                directTranscriptionWSManager.send(payload);
-                
-
-                if (TRANSLATE_ENABLED == 'true') {
-                        
-                    if (parsedTranscription.partial === false) {
-
-                        const caption = buildCaption(parsedTranscription);
-
-                        const payload = {
-                            action: WRITER_WEBSOCKET_SENDTRANSCRIPTION_ROUTE,
-                            data: caption,
-                            lang: null,
-                        };
-                        
-                        translateTranscriptionWSManager.send(payload);
-
-                    }                  
+                // AUDIO TRANSCRIPTION
+                if (AUDIO_LANGUAGE_CODE == 'en') {
+                    metadataManager.sendOverlaysMetadata(results, overlaysInformation);
+                    caption = buildCaptionForPartial(parsedTranscription);
+                    buildAndSendPayload(caption, AUDIO_LANGUAGE_CODE);
+                } else if (parsedTranscription.partial === false) {
+                    caption = buildCaptionForTotalTranscribe(parsedTranscription);
+                    buildAndSendPayload(caption, AUDIO_LANGUAGE_CODE);
                 }
-            }
+
+                // AUDIO TRANSLATION
+                if (TRANSLATE_ENABLED == 'true') {
+                    if (parsedTranscription.partial === false) {
+                        caption = buildCaptionForTotalTranslate(parsedTranscription);
+                        buildAndSendPayload(caption, null);
+                    }      
+                }
+            } 
         }
     }
 };
@@ -145,7 +134,6 @@ const parseTranscription = (results) => {
     if (results && results.length > 0) {
         if (results[0].Alternatives.length > 0) {
             const transcriptText = results[0].Alternatives[0].Transcript;
-            const decodedTranscriptText = decodeURIComponent(escape(transcriptText));
 
             startTime = endTimePrev ?? (+feedTime + +results[0].StartTime);
             endTime = +feedTime + +results[0].EndTime;
@@ -174,7 +162,7 @@ const parseTranscription = (results) => {
             );
 
             return {
-                text: decodedTranscriptText,
+                text: transcriptText,
                 startTime,
                 endTime,
                 partial: results[0].IsPartial,
@@ -187,7 +175,17 @@ const parseTranscription = (results) => {
     return null;
 };
 
-const formatCaptions = (parsedTranscription) => {
+const buildAndSendPayload = (data, lang) => {
+    const payload = {
+        action: WRITER_WEBSOCKET_SENDTRANSCRIPTION_ROUTE,
+        data,
+        lang,
+    };
+
+    lang !== null ? directTranscriptionWSManager.send(payload) : translateTranscriptionWSManager.send(payload);
+}
+
+const buildCaptionForPartial = (parsedTranscription) => {
 
     return {
         ...parsedTranscription,
@@ -201,14 +199,26 @@ const getDisplayTime = (text) => {
     return text.length / 20;
 };
 
-const buildCaption = (total) => {
+const buildCaptionForTotalTranscribe = (total) => {
     const caption = {};
     caption.partial = false;
     caption.text = total.text;
-    caption.startTime = total.startTime > previousSentCaptionEndTime ? total.startTime : previousSentCaptionEndTime;
+    caption.startTime = total.startTime > previousSentCaptionEndTimeTranscribe ? total.startTime : previousSentCaptionEndTimeTranscribe;
     caption.endTime = caption.startTime + getDisplayTime(total.text);
 
-    previousSentCaptionEndTime = caption.endTime;
+    previousSentCaptionEndTimeTranscribe = caption.endTime;
+
+    return caption;
+};
+
+const buildCaptionForTotalTranslate = (total) => {
+    const caption = {};
+    caption.partial = false;
+    caption.text = total.text;
+    caption.startTime = total.startTime > previousSentCaptionEndTimeTranslate ? total.startTime : previousSentCaptionEndTimeTranslate;
+    caption.endTime = caption.startTime + getDisplayTime(total.text);
+
+    previousSentCaptionEndTimeTranslate = caption.endTime;
 
     return caption;
 };

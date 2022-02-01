@@ -21,11 +21,25 @@ This will generate a 6 character length alphanumeric value. Then, it will update
 
 Run `aws configure` to set your credentials and the region where you want the demo resources deployed.
 
-### 3) Configure translate languages (optional)
+### 3) Change input audio language (optional)
 
-When the deployment script starts execution, you will be prompted for confirmation on whether to enable the **Translate** feature or not. If enabled, other captions languages besides English can be selected when visualizing the stream through the Player. Any [Amazon Translate](https://docs.aws.amazon.com/translate/latest/dg/what-is.html) supported language can be enabled by updating the [Translate Languages file](./translate-languages.json) and setting the desired translation languages value to **true**. If the Translate feature is enabled and no language has been enabled in the file, the **Spanish** translation will be made available by default.
+You can change the default input audio language (English) by modifying the following parameters in the [cloudformation.yaml](./cloudformation.yaml) file:
 
-### 4) Run deployment script
+* **AudioLanguageCode**: ISO 639-1 code of the audio language to be transcribed, you can find the corresponding code [here](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
+* **AudioLanguageTranscribeCode**: Amazon Transcribe code of the audio language to be transcribed, you can find the corresponding code [here](https://docs.aws.amazon.com/transcribe/latest/dg/supported-languages.html).
+
+> **Notes:**<br> 
+> * This demo supports *overlays*, *custom vocabulary* and *vocabulary filter* functionalities only for **English transcriptions**.<br>
+> * This demo supports partials only for **English transcriptions**, any other language transcriptions will be displayed with less frequency and may span across more than 2 rows of captions.
+
+### 4) Configure translate languages (optional)
+
+When the deployment script starts execution, you will be prompted for confirmation on whether to enable the **Translate** feature or not. If enabled, other captions languages besides the audio one can be selected when visualizing the stream through the Player. Any [Amazon Translate](https://docs.aws.amazon.com/translate/latest/dg/what-is.html) supported language can be enabled by updating the [Translate Languages file](./translate-languages.json) and setting the desired translation languages value to **true**. If the Translate feature is enabled and no language has been enabled in the file, the **Spanish** translation will be made available by default.
+
+> **Note:**<br> 
+> This demo supports partials only for **English transcriptions**, translations will be displayed with less frequency and may span across more than 2 rows of captions.
+
+### 5) Run deployment script
 
 Run `bash deploy.sh`.
 

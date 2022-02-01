@@ -31,14 +31,14 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
   const [showTranslate, setShowTranslate] = useState(false);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [wsCaptionsUrl, setWsCaptionsUrl] = useState(config.WS_CAPTIONS_URL);
+  const [wsCaptionsUrl, setWsCaptionsUrl] = useState(`${config.WS_CAPTIONS_URL}?lang=${config.AUDIO_LANGUAGE_CODE}`);
   const [transcriptionsQueue, setTranscriptionsQueue] = useState([]);
   const [transcriptionErrors, setTranscriptionErrors] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAudioBlocked, setIsAudioBlocked] = useState(false);
   const [isVideoBlocked, setIsVideoBlocked] = useState(false);
   const [showCaptions, setShowCaptions] = useState(true);
-  const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [currentLanguage, setCurrentLanguage] = useState(config.AUDIO_LANGUAGE_CODE);
   const [showCaptionsButtonState, setShowCaptionsButtonState] = useState(true);
   const [enableTranslate] = useState(config.ENABLE_TRANSLATE);
 
@@ -52,7 +52,6 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
   const onStateChange = useCallback(() => {
     const playerState = player.current.getState();
 
-    console.log(`Player State - ${playerState}`);
     setIsPlaying(playerState === IVSPlayer.PlayerState.PLAYING);
 
     if (playerState === IVSPlayer.PlayerState.PLAYING) {
@@ -71,7 +70,6 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
   };
 
   const onRebuffering = () => {
-    console.log('Player State - Rebuffering');
     player.current.setRebufferToLive(true);
   };
 
@@ -305,7 +303,7 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
     const endTime = newCaption.endTime + endTimeCorrection;
 
     if (showDebugInfo) {
-      console.log('[updateCaptions function message] New caption data:', {
+      console.info('[updateCaptions function message] New caption data:', {
         caption: newCaption.text,
         partial: newCaption.partial,
         originalStartTime: newCaption.startTime,
@@ -327,7 +325,7 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
       removeTranscriptionsFromQueue(playerPosition, endTimeCorrection);
       setTranscriptionErrors(errors => errors + 1);
       if (showDebugInfo) {
-        console.log('[updateCaptions function message] Caption error data:', {
+        console.info('[updateCaptions function message] Caption error data:', {
           caption: newCaption.text,
           partial: newCaption.partial,
           originalStartTime: newCaption.startTime,
@@ -408,10 +406,6 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
       }
     }
   }, [showCaptions]);
-
-  useEffect(() => {
-    console.log('streamUrl', streamUrl);
-  }, [streamUrl]);
 
   const clearTranscriptionsQueue = () => {
     setTranscriptionsQueue([]);
