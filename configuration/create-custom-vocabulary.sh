@@ -58,7 +58,7 @@ done
 if [ $? != 0 ]; then exit 1; fi
 
 if [ $VOCABULARY_STATE == READY ]; then
-	printf "\nCustom vocabulary \"$VOCABULARY_NAME\" is READY!\n"
+	printf "\nCustom vocabulary \"$VOCABULARY_NAME\" is ready!\n"
 else
 	printf "\n$(GET_VOCABULARY_ERROR)\n";
 fi

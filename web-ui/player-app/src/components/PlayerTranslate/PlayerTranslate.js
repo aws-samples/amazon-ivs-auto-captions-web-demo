@@ -6,10 +6,8 @@ import './PlayerTranslate.css';
 const VISIBLE_OPTIONS = 4;
 
 const PlayerTranslate = ({ selectedLanguage, onLanguageSelected }) => {
-  const translationLanguages = config.CAPTIONS_TRANSLATIONS_LANGUAGE_CODES.split('-') || [];
-  const captionsLanguages = [config.AUDIO_LANGUAGE_CODE]
-    .concat(translationLanguages)
-    .filter((l) => l !== '');
+  const translationLanguages = config.CAPTIONS_TRANSLATIONS_LANGUAGE_CODES.split('/') || [];
+  const captionsLanguages = [config.AUDIO_LANGUAGE_CODE].concat(translationLanguages).filter((l) => l !== '');
   const playerUI = useRef(null);
 
   useEffect(() => {
@@ -22,12 +20,10 @@ const PlayerTranslate = ({ selectedLanguage, onLanguageSelected }) => {
   }, [captionsLanguages.length]);
 
   return (
-    <div className='player-ui__translate' ref={playerUI}>
+    <div className="player-ui__translate" ref={playerUI}>
       {captionsLanguages.map((languageCode, i) => (
         <li
-          className={`player-ui-lineBorder${
-                        languageCode === selectedLanguage ? ' disabled' : ''
-                    }`}
+          className={`player-ui-lineBorder${languageCode === selectedLanguage ? ' disabled' : ''}`}
           key={i}
           data-value={languageCode}
           onClick={onLanguageSelected}

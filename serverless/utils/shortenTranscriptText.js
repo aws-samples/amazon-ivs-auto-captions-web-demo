@@ -1,6 +1,6 @@
 const ONE_ROW_CHAR_COUNT = 40;
-const WHITE_SPACE = " ";
-const NEW_LINE = "\n";
+const WHITE_SPACE = ' ';
+const NEW_LINE = '\n';
 
 const shortenTranscriptText = (text) => {
   let blocks = [];

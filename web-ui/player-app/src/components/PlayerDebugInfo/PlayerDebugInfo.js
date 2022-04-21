@@ -21,7 +21,7 @@ const PlayerDebugInfo = ({ player }) => {
         position: `${Math.ceil(player.getPosition())} sec`,
         startOffset: `${Math.ceil(player.getStartOffset())} sec`,
         quality: `${player.getQuality().name} ${player.getQuality().codecs}`,
-        bitRate: player.getQuality().bitrate
+        bitRate: player.getQuality().bitrate,
       };
     }
   };
@@ -37,8 +37,8 @@ const PlayerDebugInfo = ({ player }) => {
   }, []);
 
   return (
-    <div className='player-debug'>
-      <table className='debug-info-table'>
+    <div className="player-debug">
+      <table className="debug-info-table">
         <tbody>
           <tr>
             <th>Latency</th>

@@ -1,5 +1,5 @@
-const AWS = require("aws-sdk");
-const { AWS_REGION, KEYWORDS_TABLE_NAME } = require("./constants");
+const AWS = require('aws-sdk');
+const { AWS_REGION, KEYWORDS_TABLE_NAME } = require('./constants');
 
 AWS.config.update({ region: AWS_REGION });
 
@@ -12,10 +12,7 @@ module.exports = {
       let overlaysResponse = result.Items ?? [];
       let overlayKeywordPattern = null;
       if (overlaysResponse && overlaysResponse?.length > 0) {
-        overlayKeywordPattern = new RegExp(
-          overlaysResponse.map((overlay) => overlay.keyword).join("|"),
-          "gi"
-        );
+        overlayKeywordPattern = new RegExp(overlaysResponse.map((overlay) => overlay.keyword).join('|'), 'gi');
       }
       return {
         overlaysMap: tranformOverlaysResponse(overlaysResponse),

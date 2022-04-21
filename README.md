@@ -21,7 +21,7 @@ To get the demo running in your own AWS account, follow these instructions.
 3. Follow the instructions for deploying to AWS.
 
 ### Deploying to AWS
-* To configure and deploy this demo, follow the [deployment instructions](./deployment/README.md).
+* To deploy this demo, follow the [deployment instructions](./deployment/README.md).
 * Once deployed, to configure (optional), follow the [configuration instructions](./configuration/README.md).
 
 
@@ -33,16 +33,18 @@ To get the demo running in your own AWS account, follow these instructions.
 
 <br>
 
-## Known issues and limitations
-* The application was written for demonstration purposes and not for production use.
-* Currently only tested in **us-west-2 (Oregon)** and **us-east-1 (N. Virginia)** regions. Additional regions may be supported depending on service availability.
-* Current solution has a maximum limit of 200 users connected at the same time to a given stream with the same captions language selected. Starting from 200 connected users and up, the execution time of the query to get the connections to deliver the captions in that specific language is increased, adding latency to captions visualization until the query execution time causes a timeout in the Lambda function (which is set at 3 seconds), resulting in no captions being seen at all.
+## Known issues and limitations ⚠️
+* The solution was built for demonstration purposes only and **not for production use**.
+* The solution requires streaming to an ECS container instead of directly to Amazon IVS, which may add points of failure and additional latency.
+* The solution is currently **limited to a maximum connected viewers of ~200** (this limitation comes from the captions delivery mechanism, not Amazon IVS). Starting from 200 connected users and up, the execution time of the process to deliver the captions to connected clients increases and causes a timeout in the Lambda function (which is set at 3 seconds), resulting in captions not being delivered at all. A possible alternative approach to overcome this limitation would require replacing the WebSocket infrastructure (built on top of API Gateway, Lambda and DynamoDB) with a custom WebSocket Server implementation running in Amazon ECS and AWS Fargate. Read more [here](./docs/supporting-more-viewers.md).
+* The solution's client-side caption syncing mechanism currently relies on an undocumented Player API. This API may be changed or deprecated in the future without notice.
 * In Firefox, captions may appear very close to the bottom border of the video when there are 4 or more rows of captions.
+* The solution was only tested in **us-west-2 (Oregon)** and **us-east-1 (N. Virginia)** regions. Additional regions may be supported depending on service availability.
 
 <br>
 
 ## Estimated costs
-Deploying this demo application in your AWS account will create and consume AWS resources, which will cost money. 
+Deploying this solution in your AWS account will create and consume AWS resources, which will cost money. 
 
 Below is a table with estimated costs for scenarios with 1, 10, and 100 viewers, each receiving video in 1080p resolution during 1 hour with four translations enabled.
 

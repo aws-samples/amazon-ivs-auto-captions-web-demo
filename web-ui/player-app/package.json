@@ -17,12 +17,7 @@
     "build:dev": "env-cmd -f .env.dev react-scripts build",
     "build:prod": "env-cmd -f .env.prod react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "linter": "npx semistandard",
-    "linter-fix": "npx semistandard --fix"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
+    "eject": "react-scripts eject"
   },
   "browserslist": {
     "production": [
@@ -38,7 +33,6 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.11",
-    "@babel/preset-react": "^7.16.7",
-    "semistandard": "^16.0.1"
+    "@babel/preset-react": "^7.16.7"
   }
 }

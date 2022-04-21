@@ -11,37 +11,39 @@ const getManifestStreamTime = (isPlaying, streamUrl, player) => {
   }
 
   /* eslint-disable no-undef */
-  fetch(streamUrl).then((response) => {
-    if (!response.ok) {
-      return;
-    }
-
-    response.text().then((data) => {
-      const manifest = data.split('\n');
-      const manifestMap = {};
-
-      manifest.forEach((dataPair) => {
-        const pair = dataPair.split(',');
-        if (pair[0]) {
-          manifestMap[pair[0]] = pair[1] ?? null;
-        }
-      });
-
-      const value = manifestMap['#EXT-X-SESSION-DATA:DATA-ID="STREAM-TIME"']?.split('"')[1];
-
-      if (!value) {
+  fetch(streamUrl)
+    .then((response) => {
+      if (!response.ok) {
         return;
       }
 
-      // The position varies if the stream just started or not. Depending on that the difference changes
-      const difference = player.current.getPosition() > defaultPlayerPosition ? differenceWithLongStreamTime : differenceWithShortStreamTime;
-      _startOffset = Number(value) - player.current.getPosition() - difference;
+      response.text().then((data) => {
+        const manifest = data.split('\n');
+        const manifestMap = {};
 
-      return _startOffset;
+        manifest.forEach((dataPair) => {
+          const pair = dataPair.split(',');
+          if (pair[0]) {
+            manifestMap[pair[0]] = pair[1] ?? null;
+          }
+        });
+
+        const value = manifestMap['#EXT-X-SESSION-DATA:DATA-ID="STREAM-TIME"']?.split('"')[1];
+
+        if (!value) {
+          return;
+        }
+
+        // The position varies if the stream just started or not. Depending on that the difference changes
+        const difference = player.current.getPosition() > defaultPlayerPosition ? differenceWithLongStreamTime : differenceWithShortStreamTime;
+        _startOffset = Number(value) - player.current.getPosition() - difference;
+
+        return _startOffset;
+      });
+    })
+    .catch(function (error) {
+      console.error("Couldn't get information about stream time. Error details: ", error);
     });
-  }).catch(function (error) {
-    console.error("Couldn't get information about stream time. Error details: ", error);
-  });
 };
 
 const showIOSCaption = (data, player, showCaptionCallBack, shiftSubtitleCallBack) => {

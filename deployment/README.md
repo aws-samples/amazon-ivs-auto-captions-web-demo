@@ -8,6 +8,8 @@
 * [Git Bash](https://git-scm.com/) to run Bash scripts (only on Windows)
 * [Docker version 20.10.5 or later](https://www.docker.com/) and Docker daemon up and running to build and push ECS container images
 
+<br>
+
 ### 1) Assign random suffix to resource names
 
 Run `bash assign-random-suffix.sh`.
@@ -17,37 +19,45 @@ This will generate a 6 character length alphanumeric value. Then, it will update
 > **Note:**<br>
 > There is no script to reverse this step, but you can use Git to discard all changes and go back to the original state.
 
+<br>
+
 ### 2) Configure AWS CLI
 
 Run `aws configure` to set your credentials and the region where you want the demo resources deployed.
 
-### 3) Change input audio language (optional)
+<br>
 
-You can change the default input audio language (English) by modifying the following parameters in the [cloudformation.yaml](./cloudformation.yaml) file:
+### 3) Change Transcribe language (optional)
+
+You can change the default Transcribe language (English) by modifying the following parameters in the [cloudformation.yaml](./cloudformation.yaml) file:
 
 * **AudioLanguageCode**: ISO 639-1 code of the audio language to be transcribed, you can find the corresponding code [here](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
 * **AudioLanguageTranscribeCode**: Amazon Transcribe code of the audio language to be transcribed, you can find the corresponding code [here](https://docs.aws.amazon.com/transcribe/latest/dg/supported-languages.html).
 
 > **Notes:**<br> 
 > * This demo supports *overlays*, *custom vocabulary* and *vocabulary filter* functionalities only for **English transcriptions**.<br>
-> * This demo supports partials only for **English transcriptions**, any other language transcriptions will be displayed with less frequency and may span across more than 2 rows of captions.
+> * Captions are built using *partials* only with **English transcriptions**, which allows 2 rows of captions to be displayed at a time and in a constant manner. For any other language, captions are built using *totals*, hence they will be displayed with less frequency and may span across more than 2 rows.
 
-### 4) Configure translate languages (optional)
+<br>
 
-When the deployment script starts execution, you will be prompted for confirmation on whether to enable the **Translate** feature or not. If enabled, other captions languages besides the audio one can be selected when visualizing the stream through the Player. Any [Amazon Translate](https://docs.aws.amazon.com/translate/latest/dg/what-is.html) supported language can be enabled by updating the [Translate Languages file](./translate-languages.json) and setting the desired translation languages value to **true**. If the Translate feature is enabled and no language has been enabled in the file, the **Spanish** translation will be made available by default.
+### 4) Configure Translate language/s (optional)
+
+When the deployment script starts execution, you will be prompted for confirmation on whether to enable the **Translate** feature or not. If enabled, the transcription made by Transcribe will be translated by Translate to the configured language/s. In the live stream player you will be able to switch between the Transcribe language (transcribed audio) and the Translate language/s (transcription translation/s) for captions, by clicking on the gear icon. Any [Amazon Translate](https://docs.aws.amazon.com/translate/latest/dg/what-is.html) supported language can be enabled by modifying the [Translate Languages file](./translate-languages.json) and setting the desired translation language/s value to **true**.
 
 > **Note:**<br> 
-> This demo supports partials only for **English transcriptions**, translations will be displayed with less frequency and may span across more than 2 rows of captions.
+> Captions are built using *partials* only with **English transcriptions**, which allows 2 rows of captions to be displayed at a time and in a constant manner. For translations, captions are built using *totals*, hence they will be displayed with less frequency and may span across more than 2 rows.
+
+<br>
 
 ### 5) Run deployment script
 
 Run `bash deploy.sh`.
 
-This will deploy the demo infrastructure in AWS and then perform the following configuration steps using the default configuration values included in this repo.
+This will deploy the demo infrastructure in AWS. **Only if the Transcribe language is English**, the following configurations will be performed at the end of the deployment process, using the already provided default values:
 
-* [Configure overlays](../configuration/README.md#configure-overlays)
-* [Configure custom vocabulary](../configuration/README.md#configure-custom-vocabulary)
-* [Configure vocabulary filter](../configuration/README.md#configure-vocabulary-filter)
+* [Overlays](../configuration/README.md#configure-overlays)
+* [Custom vocabulary](../configuration/README.md#configure-custom-vocabulary)
+* [Vocabulary filter](../configuration/README.md#configure-vocabulary-filter)
 
 > **Note:**<br>
 > On MacOS, some steps of the deployment show large outputs that require you to press "q" to continue with the deployment execution.
@@ -134,7 +144,7 @@ bash deploy-player-app.sh stack.json
 
 ### setup-images.sh
 
-Creates 2 repositories in the Amazon ECS private resgistry to host the Stream and Transcribe containers images. Then, logs in into the registry and uses the [Stream Dockerfile](../serverless/stream-server/Dockerfile) and [Transcribe Dockerfile]((../serverless/stream-server/Dockerfile)) to build and push the corresponding images. This script is called by the [deploy.sh](#deploysh) script.
+Creates 2 repositories in the Amazon ECS private registry to host the Stream and Transcribe containers images. Then, logs in into the registry and uses the [Stream Dockerfile](../serverless/stream-server/Dockerfile) and [Transcribe Dockerfile]((../serverless/stream-server/Dockerfile)) to build and push the corresponding images. This script is called by the [deploy.sh](#deploysh) script.
 
 Parameters: None
 
@@ -198,7 +208,7 @@ Main script used to perform the demo deployment. It calls the following scripts:
 2) [setup-images.sh](#setup-imagessh)
 3) [create-stack.sh](#create-stacksh)
 4) [deploy-player-app.sh](#deploy-player-appsh)
-5) [configure-all.sh](../configuration/README.md#configure-allsh)
+5) [configure-all.sh](../configuration/README.md#configure-allsh) (only if Transcribe language is English)
 6) [generate-output.js](#generate-outputjs)
 
 Parameters: None
@@ -283,4 +293,54 @@ Example:
 
 ```shell
 node delete-api-stages.js --stackOutputFilePath stack.json
+```
+
+<br>
+
+### get-audio-language-code.js
+
+Retrieves the **AudioLanguageCode** CloudFormation parameter value from the stack output file (*stack.json*). This script is called by the [deploy.sh](#deploysh) script to check the audio language. If the code is **en** (English) the overlays, custom vocabulary and vocabulary filter configurations are performed with the provided default values; if the code is not **en**, configurations are not performed.
+
+Parameters:
+* `--stackOutputFilePath`: Path to CloudFormation output file (required).
+
+Example:
+
+```shell
+node get-audio-language-code.js --stackOutputFilePath stack.json
+```
+
+<br>
+
+### get-translate-languages.js
+
+Retrieves the configured Translate languages codes (i.e. the codes between brackets within the keys that have the value **true** in the [Translate Languages file](./translate-languages.json)) and outputs them as comma-separated values. The script assumes the Translate languages file is located in the same directory. This script is called by the [deploy.sh](#deploysh) script.
+
+Parameters: None
+
+Example:
+
+```shell
+node get-translate-languages.js
+```
+
+<br>
+
+### validate-translate-config.js
+
+Validates that the Translate configuration is correct:
+
+* There is at least one Translate language enabled
+* There is no Translate language equal to the Transcribe language
+* Translate languages have been retrieved correctly
+
+The script assumes the CloudFormation template file is located in the same directory. This script is called by the [deploy.sh](#deploysh) script.
+
+Parameters:
+* TRANSLATE_LANGUAGES: Enabled Translate language codes as a list of comma-separated values (required).
+
+Example:
+
+```shell
+node validate-translate-config.js
 ```

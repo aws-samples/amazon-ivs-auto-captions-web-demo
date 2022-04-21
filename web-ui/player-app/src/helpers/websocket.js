@@ -1,3 +1,5 @@
+import { logDebugMessage } from './logDebugMessage';
+
 const closeSocket = (socket) => {
   if (socket) {
     // Check if the current state of the connection is CONNECTING (0)
@@ -14,10 +16,10 @@ const setOnMessageListener = (socket, isDebugMode, onMessage) => {
   const listenerDebugOn = (event) => {
     try {
       const data = JSON.parse(event.data);
-      console.log('[Websocket message] Data received from server:', data);
+      logDebugMessage('log', '[WebSocket message] Data received from server:', data);
       onMessage(data);
     } catch (err) {
-      console.error(err);
+      logDebugMessage('log', err);
     }
   };
 
@@ -26,7 +28,7 @@ const setOnMessageListener = (socket, isDebugMode, onMessage) => {
       const data = JSON.parse(event.data);
       onMessage(data);
     } catch (err) {
-      console.error(err);
+      logDebugMessage('error', err);
     }
   };
 
@@ -42,15 +44,18 @@ const createSocket = (url, isDebugMode, onMessage) => {
 
     setOnMessageListener(socket, isDebugMode, onMessage);
 
-    socket.onclose = () => {
-      setTimeout(() => createSocket(url, isDebugMode, onMessage), 100);
+    socket.onclose = (event) => {
+      if (!event.wasClean) {
+        logDebugMessage('error', '[WebSocket onclose event] Connection died, reconnecting...');
+        setTimeout(() => createSocket(url, isDebugMode, onMessage), 100);
+      }
     };
 
     socket.onerror = (error) => {
-      console.error('[Websocket onerror event]', error);
+      logDebugMessage('error', '[WebSocket onerror event]', error);
     };
   } catch (err) {
-    console.error(`[Websockets exception] ${err.message}`);
+    logDebugMessage('error', `[WebSockets exception] ${err.message}`);
   }
 
   return socket;

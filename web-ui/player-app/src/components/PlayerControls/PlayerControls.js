@@ -10,10 +10,20 @@ import {
   Settings,
   Fullscreen,
   ExitFullscreen,
-  Translate
+  Translate,
 } from '../../assets/icons';
 
-const PlayerControls = ({ player, showCaptions, toggleCaptions, openSettings, openTranslate, isFullscreen, toggleFullscreen, startsMuted, enableTranslate }) => {
+const PlayerControls = ({
+  player,
+  showCaptions,
+  toggleCaptions,
+  openSettings,
+  openTranslate,
+  isFullscreen,
+  toggleFullscreen,
+  startsMuted,
+  enableTranslate,
+}) => {
   const [muted, setMuted] = useState(startsMuted);
   const [paused, setPaused] = useState(false);
   const [rotation, setRotation] = useState(false);
@@ -61,31 +71,32 @@ const PlayerControls = ({ player, showCaptions, toggleCaptions, openSettings, op
   };
 
   return (
-    <div className='player-ui-controls'>
-      <div className='player-ui-controls__actions player-ui-controls__actions--left'>
-        <button className='player-ui-button' onClick={togglePause}>
+    <div className="player-ui-controls">
+      <div className="player-ui-controls__actions player-ui-controls__actions--left">
+        <button className="player-ui-button" onClick={togglePause}>
           {paused ? <Play /> : <Pause />}
         </button>
 
-        <button className='player-ui-button' onClick={toggleMute}>
+        <button className="player-ui-button" onClick={toggleMute}>
           {muted ? <VolumeOff /> : <VolumeUp />}
         </button>
       </div>
 
-      <div className='player-ui-controls__actions player-ui-controls__actions--right'>
-        <button className='player-ui-button' onClick={toggleCaptions}>
+      <div className="player-ui-controls__actions player-ui-controls__actions--right">
+        <button className="player-ui-button" onClick={toggleCaptions}>
           {showCaptions ? <ClosedCaption /> : <ClosedCaptionDisabled />}
         </button>
 
-        {enableTranslate === 'true' &&
-          <button className='player-ui-button' onClick={onCaptionsOptionsClick}>
+        {enableTranslate === 'true' && (
+          <button className="player-ui-button" onClick={onCaptionsOptionsClick}>
             <Translate ref={gearIconRef} />
-          </button>}
+          </button>
+        )}
 
-        <button className='player-ui-button' onClick={toggleFullscreen}>
+        <button className="player-ui-button" onClick={toggleFullscreen}>
           {isFullscreen ? <ExitFullscreen /> : <Fullscreen />}
         </button>
-        <button className='player-ui-button' onClick={openSettings}>
+        <button className="player-ui-button" onClick={openSettings}>
           <Settings />
         </button>
       </div>

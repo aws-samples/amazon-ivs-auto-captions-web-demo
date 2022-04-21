@@ -1,4 +1,4 @@
-FROM buildpack-deps:stretch
+FROM --platform=linux/amd64 buildpack-deps:stretch
 
 # Versions of Nginx and nginx-rtmp-module to use
 ENV NGINX_VERSION nginx-1.18.0
@@ -53,7 +53,7 @@ COPY nginx/nginx.conf /etc/nginx/nginx.conf
 # Config Stunnel
 RUN mkdir -p  /etc/stunnel/conf.d
 
-# Set up config file 
+# Set up config file
 COPY stunnel/stunnel.conf /etc/stunnel/stunnel.conf
 COPY stunnel/stunnel4 /etc/default/stunnel4
 

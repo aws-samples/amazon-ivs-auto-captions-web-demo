@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM --platform=linux/amd64 node:lts-alpine
 WORKDIR /usr/src/transcribe
 RUN apk add --no-cache --virtual .gyp python3 make g++ ffmpeg
 COPY . ./

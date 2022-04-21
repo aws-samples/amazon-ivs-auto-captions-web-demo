@@ -1,4 +1,4 @@
 module.exports = {
-  DATE_UTILS: require("./dateUtils"),
-  OVERLAYS_UTILS: require("./overlaysUtils"),
+  DATE_UTILS: require('./dateUtils'),
+  OVERLAYS_UTILS: require('./overlaysUtils'),
 };

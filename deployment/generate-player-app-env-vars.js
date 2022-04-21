@@ -18,35 +18,20 @@ if (!cloudformationOutputs) {
   process.exit(1);
 }
 
-// Get value for WSCaptionsUrl key
-const REACT_APP_WS_CAPTIONS_URL = findOutput(
-  cloudformationOutputs,
-  'ReaderWebSocketURL'
-);
+// Get value for ReaderWebSocketURL key
+const REACT_APP_WS_CAPTIONS_URL = findOutput(cloudformationOutputs, 'ReaderWebSocketURL');
 
 // Get value for StreamPlaybackUrl key
-const REACT_APP_STREAM_PLAYBACK_URL = findOutput(
-  cloudformationOutputs,
-  'StreamPlaybackURL'
-);
+const REACT_APP_STREAM_PLAYBACK_URL = findOutput(cloudformationOutputs, 'StreamPlaybackURL');
 
 // Get value for CaptionsTranslationsLanguageCodes key
-const REACT_APP_CAPTIONS_TRANSLATIONS_LANGUAGE_CODES = findOutput(
-  cloudformationOutputs,
-  'CaptionsTranslationsLanguageCodes'
-);
+const REACT_APP_CAPTIONS_TRANSLATIONS_LANGUAGE_CODES = findOutput(cloudformationOutputs, 'CaptionsTranslationsLanguageCodes');
 
 // Get value for EnableTranslate key
-const REACT_APP_ENABLE_TRANSLATE = findOutput(
-  cloudformationOutputs,
-  'EnableTranslate'
-);
+const REACT_APP_ENABLE_TRANSLATE = findOutput(cloudformationOutputs, 'EnableTranslate');
 
 // Get value for AudioLanguageCode key
-const REACT_APP_AUDIO_LANGUAGE_CODE = findOutput(
-  cloudformationOutputs,
-  'AudioLanguageCode'
-);
+const REACT_APP_AUDIO_LANGUAGE_CODE = findOutput(cloudformationOutputs, 'AudioLanguageCode');
 
 // Create .env file with environment variables
 let envFile = `REACT_APP_WS_CAPTIONS_URL=${REACT_APP_WS_CAPTIONS_URL}\n`;

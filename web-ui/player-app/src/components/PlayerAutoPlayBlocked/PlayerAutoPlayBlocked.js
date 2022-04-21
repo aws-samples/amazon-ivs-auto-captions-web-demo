@@ -4,8 +4,8 @@ import './PlayerAutoPlayBlocked.css';
 
 const PlayerAutoPlayBlocked = ({ startPlayback }) => {
   return (
-    <div className='large-play-background'>
-      <div onClick={startPlayback} className='large-play-icon'>
+    <div className="large-play-background">
+      <div onClick={startPlayback} className="large-play-icon">
         <LargePlay />
       </div>
     </div>

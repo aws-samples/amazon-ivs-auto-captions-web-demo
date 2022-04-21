@@ -7,7 +7,7 @@ const config = {
   MAX_OVERLAYS: 4,
   TIME_OVERLAYS: 6000,
   BIG_TYPOGRAPHY_LANGUAGES: ['hi', 'ja', 'ka', 'ko', 'zh', 'zh-TW'],
-  RIGHT_ALIGNED_LANGUAGES: ['ar', 'he']
+  RIGHT_ALIGNED_LANGUAGES: ['ar', 'he'],
 };
 
 export default config;

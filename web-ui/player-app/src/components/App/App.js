@@ -5,7 +5,7 @@ import './App.css';
 
 const App = () => {
   return (
-    <div className='App'>
+    <div className="App">
       <ClosedCaptionPlayer streamUrl={configData.STREAM_PLAYBACK_URL} />
     </div>
   );

@@ -1,5 +1,5 @@
-const AWS = require("aws-sdk");
-const { AWS_IVS_CHANNEL_ARN, IVS_API_VERSION } = require("./constants");
+const AWS = require('aws-sdk');
+const { IVS_CHANNEL_ARN, IVS_API_VERSION } = require('./constants');
 
 const AwsIvs = new AWS.IVS({ apiVersion: IVS_API_VERSION });
 
@@ -7,7 +7,7 @@ let phraseOverlays = {};
 
 const ivsPutMetadata = (data) => {
   const params = {
-    channelArn: AWS_IVS_CHANNEL_ARN,
+    channelArn: IVS_CHANNEL_ARN,
     metadata: JSON.stringify(data),
   };
 
@@ -23,8 +23,8 @@ const sendOverlayMetadataToIvs = (overlay, overlaysMap) => {
 
   if (overlayMetadata) {
     const payload = {
-      type: "overlay",
-      imgUrl: overlayMetadata.imageUrl ?? "#",
+      type: 'overlay',
+      imgUrl: overlayMetadata.imageUrl ?? '#',
       keyword: overlay,
       url: overlayMetadata.website ?? null,
     };
@@ -38,10 +38,8 @@ module.exports = {
     if (!(overlaysInformation?.overlaysPattern && results?.[0]?.Alternatives?.length > 0)) {
       return;
     }
-    
-    const transcript = decodeURIComponent(
-      escape(results[0].Alternatives[0].Transcript)
-    );
+
+    const transcript = decodeURIComponent(escape(results[0].Alternatives[0].Transcript));
     const matches = transcript.match(overlaysInformation.overlaysPattern) ?? [];
     const sentOverlays = Object.assign({}, phraseOverlays);
 

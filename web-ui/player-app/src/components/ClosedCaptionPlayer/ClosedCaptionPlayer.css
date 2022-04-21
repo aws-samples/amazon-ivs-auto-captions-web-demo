@@ -28,7 +28,8 @@
   bottom: 0;
 }
 
-.player:hover .player-ui-controls, .player:hover .player-ui__translate {
+.player:hover .player-ui-controls,
+.player:hover .player-ui__translate {
   z-index: 1;
 }
 
@@ -97,7 +98,7 @@
   height: 3rem;
 }
 
-.player-ui-button:disabled{
+.player-ui-button:disabled {
   opacity: 0.5;
 }
 
@@ -131,8 +132,8 @@
   overflow-x: hidden;
 }
 
-.player-ui__translate::-webkit-scrollbar { 
-  width: 8px; 
+.player-ui__translate::-webkit-scrollbar {
+  width: 8px;
 }
 
 .player-ui__translate::-webkit-scrollbar-track {
@@ -140,16 +141,16 @@
 }
 
 .player-ui__translate::-webkit-scrollbar-thumb {
-  background-color: white;   
-  border-radius: 20px;        
+  background-color: white;
+  border-radius: 20px;
 }
 
 .player-ui-lineBorder {
-  color : white;
-  cursor:pointer;
+  color: white;
+  cursor: pointer;
   padding-top: 10px;
   padding-bottom: 10px;
-  list-style:none;
+  list-style: none;
   text-align: center;
 }
 
@@ -181,8 +182,10 @@
   padding-bottom: 10px;
 }
 
-.player-settings h3, .player-settings h4, .player-settings .close-icon {
-  color: #EB5F07;
+.player-settings h3,
+.player-settings h4,
+.player-settings .close-icon {
+  color: #eb5f07;
 }
 
 .captions-options-icon {

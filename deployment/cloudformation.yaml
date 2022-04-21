@@ -640,13 +640,13 @@ Resources:
               Value: !Ref AudioLanguageTranscribeCode
             - Name: AUDIO_LANGUAGE_CODE
               Value: !Ref AudioLanguageCode
-            - Name: VOCABULARY_NAME
+            - Name: CUSTOM_VOCABULARY_NAME
               Value: !Ref TranscribeCustomVocabularyName
             - Name: VOCABULARY_FILTER
               Value: !Ref TranscribeVocabularyFilterName
-            - Name: AWS_IVS_CHANNEL_ARN
+            - Name: IVS_CHANNEL_ARN
               Value: !Ref IVSChannel
-            - Name: AWS_GW_WS
+            - Name: WRITER_WEBSOCKET_API_URL
               Value: !Join [ "/", [ !GetAtt WriterWebSocket.ApiEndpoint, !Ref WriterWebSocketStage ] ]
             - Name: RTMP_INPUT
               Value: !Sub rtmp://${StreamServiceDiscovery.Name}.${PrivateDNSNamespaceName}/ivs/streamkey-${AWS::StackName}-<RANDOM_SUFFIX>
@@ -654,7 +654,7 @@ Resources:
               Value: !Ref DynamoDBOverlaysTableName
             - Name: TRANSLATE_ENABLED
               Value: !Ref EnableTranslate
-            - Name: TRANSLATE_WEB_SOCKET_URL
+            - Name: TRANSLATE_WEBSOCKET_URL
               Value: !If [ TranslateEnabled, !Sub 'ws://${TranslateServiceDiscovery.Name}.${PrivateDNSNamespaceName}:3600', !Ref "AWS::NoValue"]
       Memory: 1024
       TaskRoleArn: !GetAtt ECSRole.Arn
