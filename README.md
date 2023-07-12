@@ -11,8 +11,8 @@ This is a serverless web application, leveraging [Amazon IVS](https://aws.amazon
 <br>
 
 ## Getting Started
-
-⚠️ **IMPORTANT NOTE:** *Deploying this demo application in your AWS account will create and consume AWS resources, which will cost money.*
+### ⚠️ Please note that this demo is experimental, and should only be used for educational purposes.
+⚠️ *Deploying this demo application in your AWS account will create and consume AWS resources, which will cost money.*
 
 To get the demo running in your own AWS account, follow these instructions.
 
@@ -33,13 +33,14 @@ To get the demo running in your own AWS account, follow these instructions.
 
 <br>
 
-## Known issues and limitations ⚠️
+## ⚠️ Known issues and limitations
 * The solution was built for demonstration purposes only and **not for production use**.
 * The solution requires streaming to an ECS container instead of directly to Amazon IVS, which may add points of failure and additional latency.
 * The solution is currently **limited to a maximum connected viewers of ~200** (this limitation comes from the captions delivery mechanism, not Amazon IVS). Starting from 200 connected users and up, the execution time of the process to deliver the captions to connected clients increases and causes a timeout in the Lambda function (which is set at 3 seconds), resulting in captions not being delivered at all. A possible alternative approach to overcome this limitation would require replacing the WebSocket infrastructure (built on top of API Gateway, Lambda and DynamoDB) with a custom WebSocket Server implementation running in Amazon ECS and AWS Fargate. Read more [here](./docs/supporting-more-viewers.md).
 * The solution's client-side caption syncing mechanism currently relies on an undocumented Player API. This API may be changed or deprecated in the future without notice.
 * In Firefox, captions may appear very close to the bottom border of the video when there are 4 or more rows of captions.
 * The solution was only tested in **us-west-2 (Oregon)** and **us-east-1 (N. Virginia)** regions. Additional regions may be supported depending on service availability.
+* You may explore using [this demo](https://github.com/aws-samples/amazon-transcribe-streaming-live-closed-captions) as an alternative, which has fewer limitations.
 
 <br>
 
