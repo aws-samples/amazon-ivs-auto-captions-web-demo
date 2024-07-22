@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useRef, useState } from 'react';
+import { deviceDetect } from 'react-device-detect';
 
 import config from '../../config';
 import Placeholder from '../Placeholder';
@@ -9,10 +10,18 @@ import PlayerTranslate from '../PlayerTranslate';
 import PlayerAutoPlayBlocked from '../PlayerAutoPlayBlocked';
 import Overlays from '../Overlays';
 import { closeSocket, createSocket } from '../../helpers/websocket';
-import { getManifestStreamTime, showIOSCaption } from '../../helpers/iosCaption';
+import {
+  getManifestStreamTime,
+  showIOSCaption
+} from '../../helpers/iosCaption';
 import canAutoPlay from 'can-autoplay';
 
 import './ClosedCaptionPlayer.css';
+
+const { IVSPlayer } = window;
+const { isPlayerSupported, PlayerState, PlayerEventType } = IVSPlayer;
+const { PLAYING, ENDED, READY, IDLE, BUFFERING } = PlayerState;
+const { ERROR, REBUFFERING, TEXT_METADATA_CUE } = PlayerEventType;
 
 const CAPTIONS_MAX_DISPLAY_TIME = 5;
 const CAPTIONS_UPDATE_INTERVAL = 100;
@@ -21,24 +30,24 @@ const IOS_LINE_POSITION = -4;
 const LINE_POSITION = -3;
 
 const ClosedCaptionPlayer = ({ streamUrl }) => {
-  const deviceDetect = require('react-device-detect');
-
-  const { IVSPlayer } = window;
-  const { isPlayerSupported } = IVSPlayer;
   const [overlays, setOverlays] = useState([]);
   const [placeHolderStatus, setPlaceHolderStatus] = useState('loading');
   const [showSettings, setShowSettings] = useState(false);
   const [showTranslate, setShowTranslate] = useState(false);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [wsCaptionsUrl, setWsCaptionsUrl] = useState(`${config.WS_CAPTIONS_URL}?lang=${config.AUDIO_LANGUAGE_CODE}`);
+  const [wsCaptionsUrl, setWsCaptionsUrl] = useState(
+    `${config.WS_CAPTIONS_URL}?lang=${config.AUDIO_LANGUAGE_CODE}`
+  );
   const [transcriptionsQueue, setTranscriptionsQueue] = useState([]);
   const [transcriptionErrors, setTranscriptionErrors] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAudioBlocked, setIsAudioBlocked] = useState(false);
   const [isVideoBlocked, setIsVideoBlocked] = useState(false);
   const [showCaptions, setShowCaptions] = useState(true);
-  const [currentLanguage, setCurrentLanguage] = useState(config.AUDIO_LANGUAGE_CODE);
+  const [currentLanguage, setCurrentLanguage] = useState(
+    config.AUDIO_LANGUAGE_CODE
+  );
   const [showCaptionsButtonState, setShowCaptionsButtonState] = useState(true);
   const [enableTranslate] = useState(config.ENABLE_TRANSLATE);
 
@@ -52,14 +61,14 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
   const onStateChange = useCallback(() => {
     const playerState = player.current.getState();
 
-    setIsPlaying(playerState === IVSPlayer.PlayerState.PLAYING);
+    setIsPlaying(playerState === PLAYING);
 
-    if (playerState === IVSPlayer.PlayerState.PLAYING) {
+    if (playerState === PLAYING) {
       setPlaceHolderStatus(null);
       if (trackEl && trackEl.current) {
         trackEl.current.track.mode = 'showing';
       }
-    } else if (playerState === IVSPlayer.PlayerState.ENDED) {
+    } else if (playerState === ENDED) {
       setPlaceHolderStatus('This live stream has ended');
     }
   }, [IVSPlayer.PlayerState]);
@@ -93,7 +102,9 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
       // Removes the overlay if already exists in the array.
       // Otherwise, if the maximum is reached, removes the first overlay.
       if (newOverlays.find((overlay) => overlay.keyword === keyword)) {
-        newOverlays = newOverlays.filter((overlay) => overlay.keyword !== keyword);
+        newOverlays = newOverlays.filter(
+          (overlay) => overlay.keyword !== keyword
+        );
       } else if (newOverlays.length >= config.MAX_OVERLAYS) {
         newOverlays.shift();
       }
@@ -104,7 +115,9 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
 
     // Each overlay is removed from the array after a period defined by <TIME_OVERLAYS>.
     setTimeout(() => {
-      setOverlays((oldOverlays) => oldOverlays.filter((overlay) => overlay.id !== imgId));
+      setOverlays((oldOverlays) =>
+        oldOverlays.filter((overlay) => overlay.id !== imgId)
+      );
     }, config.TIME_OVERLAYS);
   };
 
@@ -117,16 +130,18 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
   };
 
   const AddEventListeners = useCallback(() => {
+    if (!player.current) return;
+
     const video = playerWrapper.current.getElementsByTagName('video')[0];
 
-    player.current.addEventListener(IVSPlayer.PlayerState.READY, onStateChange);
-    player.current.addEventListener(IVSPlayer.PlayerState.PLAYING, onStateChange);
-    player.current.addEventListener(IVSPlayer.PlayerState.BUFFERING, onStateChange);
-    player.current.addEventListener(IVSPlayer.PlayerState.IDLE, onStateChange);
-    player.current.addEventListener(IVSPlayer.PlayerState.ENDED, onStateChange);
-    player.current.addEventListener(IVSPlayer.PlayerEventType.ERROR, onError);
-    player.current.addEventListener(IVSPlayer.PlayerEventType.REBUFFERING, onRebuffering);
-    player.current.addEventListener(IVSPlayer.PlayerEventType.TEXT_METADATA_CUE, onTextMetadataCue);
+    player.current.addEventListener(READY, onStateChange);
+    player.current.addEventListener(PLAYING, onStateChange);
+    player.current.addEventListener(BUFFERING, onStateChange);
+    player.current.addEventListener(IDLE, onStateChange);
+    player.current.addEventListener(ENDED, onStateChange);
+    player.current.addEventListener(ERROR, onError);
+    player.current.addEventListener(REBUFFERING, onRebuffering);
+    player.current.addEventListener(TEXT_METADATA_CUE, onTextMetadataCue);
 
     if (deviceDetect.isMobileSafari) {
       video.addEventListener('webkitendfullscreen', onFullScreenChange);
@@ -135,24 +150,42 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
     } else {
       document.addEventListener('fullscreenchange', onFullScreenChange);
     }
-  }, [IVSPlayer.PlayerState, IVSPlayer.PlayerEventType, deviceDetect.isMobileSafari, deviceDetect.isSafari, onStateChange, onTextMetadataCue]);
+  }, [
+    IVSPlayer.PlayerState,
+    IVSPlayer.PlayerEventType,
+    deviceDetect.isMobileSafari,
+    deviceDetect.isSafari,
+    onStateChange,
+    onTextMetadataCue
+  ]);
 
   const RemoveEventListeners = useCallback(() => {
+    if (!player.current) return;
+
     const video = playerWrapper.current.getElementsByTagName('video')[0];
 
-    player.current.removeEventListener(IVSPlayer.PlayerState.READY, onStateChange);
-    player.current.removeEventListener(IVSPlayer.PlayerState.PLAYING, onStateChange);
-    player.current.removeEventListener(IVSPlayer.PlayerState.BUFFERING, onStateChange);
-    player.current.removeEventListener(IVSPlayer.PlayerState.IDLE, onStateChange);
-    player.current.removeEventListener(IVSPlayer.PlayerState.ENDED, onStateChange);
+    player.current.removeEventListener(READY, onStateChange);
+    player.current.removeEventListener(PLAYING, onStateChange);
+    player.current.removeEventListener(BUFFERING, onStateChange);
+    player.current.removeEventListener(IDLE, onStateChange);
+    player.current.removeEventListener(ENDED, onStateChange);
     player.current.addEventListener(IVSPlayer.PlayerEventType.ERROR, onError);
-    player.current.addEventListener(IVSPlayer.PlayerEventType.REBUFFERING, onRebuffering);
-    player.current.addEventListener(IVSPlayer.PlayerEventType.TEXT_METADATA_CUE, onTextMetadataCue);
+    player.current.addEventListener(
+      IVSPlayer.PlayerEventType.REBUFFERING,
+      onRebuffering
+    );
+    player.current.addEventListener(
+      IVSPlayer.PlayerEventType.TEXT_METADATA_CUE,
+      onTextMetadataCue
+    );
 
     if (deviceDetect.isMobileSafari) {
       video.removeEventListener('webkitendfullscreen', onFullScreenChange);
     } else if (deviceDetect.isSafari) {
-      document.removeEventListener('webkitfullscreenchange', onFullScreenChange);
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        onFullScreenChange
+      );
     } else {
       document.removeEventListener('fullscreenchange', onFullScreenChange);
     }
@@ -163,8 +196,20 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
     deviceDetect.isMobileSafari,
     deviceDetect.isSafari,
     onStateChange,
-    onTextMetadataCue,
+    onTextMetadataCue
   ]);
+
+  const destroy = useCallback(() => {
+    if (!player.current) return;
+
+    // remove event listeners
+    RemoveEventListeners();
+
+    // delete and nullify player
+    player.current.pause();
+    player.current.delete();
+    player.current = null;
+  }, []);
 
   /** WEBSOCKET CONNECTION useEffect - START **/
 
@@ -192,10 +237,19 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
   /** iOS STREAM TIME HANDLE useEffect - START **/
 
   useEffect(() => {
-    if (deviceDetect.isIOS && (deviceDetect.deviceType === 'mobile' || deviceDetect.isChrome)) {
+    if (
+      deviceDetect.isIOS &&
+      (deviceDetect.deviceType === 'mobile' || deviceDetect.isChrome)
+    ) {
       getManifestStreamTime(isPlaying, streamUrl, player);
     }
-  }, [isPlaying, streamUrl, deviceDetect.isIOS, deviceDetect.isChrome, deviceDetect.deviceType]);
+  }, [
+    isPlaying,
+    streamUrl,
+    deviceDetect.isIOS,
+    deviceDetect.isChrome,
+    deviceDetect.deviceType
+  ]);
 
   /** iOS STREAM TIME HANDLE useEffect - END **/
 
@@ -240,7 +294,10 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
     /* eslint-disable no-undef */
 
     // format new cue accordingly
-    if (config.ENABLE_TRANSLATE === 'true' && config.RIGHT_ALIGNED_LANGUAGES.includes(currentLanguage)) {
+    if (
+      config.ENABLE_TRANSLATE === 'true' &&
+      config.RIGHT_ALIGNED_LANGUAGES.includes(currentLanguage)
+    ) {
       if (deviceDetect.isMacOs && deviceDetect.isSafari) {
         newCue.align = 'center';
         newCue.positionAlign = 'line-right';
@@ -257,7 +314,9 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
 
     // increase distance between player bottom and captions for translations (because they can span in more than 2 rows)
     if (currentLanguage !== 'en') {
-      newCue.line = deviceDetect.isIOS ? IOS_LINE_POSITION - 1 : LINE_POSITION - 1;
+      newCue.line = deviceDetect.isIOS
+        ? IOS_LINE_POSITION - 1
+        : LINE_POSITION - 1;
     } else {
       newCue.line = deviceDetect.isIOS ? IOS_LINE_POSITION : LINE_POSITION;
     }
@@ -284,7 +343,10 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
     // get new caption
     const newCaption = transcriptionsQueue[0];
 
-    if (deviceDetect.isIOS && (deviceDetect.deviceType === 'mobile' || deviceDetect.isChrome)) {
+    if (
+      deviceDetect.isIOS &&
+      (deviceDetect.deviceType === 'mobile' || deviceDetect.isChrome)
+    ) {
       showIOSCaption(newCaption, player, showCaption, shiftTranscriptionsQueue);
       return;
     }
@@ -318,7 +380,7 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
         playerStartOffset: playerStartOffset,
         playerPosition: playerPosition,
         playerLiveLatency: playerLiveLatency,
-        transcriptionErrors: transcriptionErrors,
+        transcriptionErrors: transcriptionErrors
       });
     }
 
@@ -340,14 +402,17 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
           playerStartOffset: playerStartOffset,
           playerPosition: playerPosition,
           playerLiveLatency: playerLiveLatency,
-          transcriptionErrors: transcriptionErrors,
+          transcriptionErrors: transcriptionErrors
         });
       }
     }
   };
 
   useEffect(() => {
-    captionsInterval.current = setInterval(() => updateCaptions(), CAPTIONS_UPDATE_INTERVAL);
+    captionsInterval.current = setInterval(
+      () => updateCaptions(),
+      CAPTIONS_UPDATE_INTERVAL
+    );
     return () => clearInterval(captionsInterval.current);
   });
 
@@ -365,7 +430,9 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
 
   useEffect(() => {
     if (!isPlayerSupported) {
-      console.warn('The current browser does not support the Amazon IVS player.');
+      console.warn(
+        'The current browser does not support the Amazon IVS player.'
+      );
       return;
     }
 
@@ -377,31 +444,35 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
     player.current.load(streamUrl);
 
     // Ask if the browser allows autoplay with sound
-    canAutoPlay.video({ muted: false, inline: true, timeout: 1000 }).then(({ result, error }) => {
-      if (result) {
-        player.current.play();
-      } else {
-        console.warn(error);
-        canAutoplayMuted();
-      }
-    });
-
-    // Ask for autoplay without sound
-    const canAutoplayMuted = () =>
-      canAutoPlay.video({ muted: true, inline: true, timeout: 1000 }).then(({ result }) => {
+    canAutoPlay
+      .video({ muted: false, inline: true, timeout: 1000 })
+      .then(({ result, error }) => {
         if (result) {
-          setIsAudioBlocked(true);
-          player.current.setMuted(true);
           player.current.play();
         } else {
-          setIsVideoBlocked(true);
+          console.warn(error);
+          canAutoplayMuted();
         }
       });
 
+    // Ask for autoplay without sound
+    const canAutoplayMuted = () =>
+      canAutoPlay
+        .video({ muted: true, inline: true, timeout: 1000 })
+        .then(({ result }) => {
+          if (result) {
+            setIsAudioBlocked(true);
+            player.current.setMuted(true);
+            player.current.play();
+          } else {
+            setIsVideoBlocked(true);
+          }
+        });
+
     return () => {
-      RemoveEventListeners();
+      destroy();
     };
-  }, [IVSPlayer, isPlayerSupported, streamUrl, AddEventListeners, RemoveEventListeners]);
+  }, [IVSPlayer, isPlayerSupported, streamUrl, AddEventListeners, destroy]);
 
   useEffect(() => {
     if (trackEl.current) {
@@ -489,20 +560,48 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
   return (
     <div className="stream-wrapper" ref={playerWrapper}>
       <div className="aspect-16x9">
-        {placeHolderStatus && !isVideoBlocked && <Placeholder status={placeHolderStatus} />}
+        {placeHolderStatus && !isVideoBlocked && (
+          <Placeholder status={placeHolderStatus} />
+        )}
         <div className="player">
-          {!placeHolderStatus && overlays && overlays.length > 0 && <Overlays overlays={overlays} />}
+          {!placeHolderStatus && overlays && overlays.length > 0 && (
+            <Overlays overlays={overlays} />
+          )}
 
-          <video ref={videoEl} className="video-el" playsInline preload="metadata" crossOrigin="anonymous">
-            {!placeHolderStatus && <track ref={trackEl} kind="captions" srcLang={currentLanguage} default />}
+          <video
+            ref={videoEl}
+            className="video-el"
+            playsInline
+            preload="metadata"
+            crossOrigin="anonymous"
+          >
+            {!placeHolderStatus && (
+              <track
+                ref={trackEl}
+                kind="captions"
+                srcLang={currentLanguage}
+                default
+              />
+            )}
           </video>
 
           <div className="player-ui">
             {showDebugInfo && <PlayerDebugInfo player={player.current} />}
 
-            {showSettings && <PlayerSettings toggleSettings={toggleSettings} toggleDebugInfo={toggleDebugInfo} showDebugInfo={showDebugInfo} />}
+            {showSettings && (
+              <PlayerSettings
+                toggleSettings={toggleSettings}
+                toggleDebugInfo={toggleDebugInfo}
+                showDebugInfo={showDebugInfo}
+              />
+            )}
 
-            {showTranslate && <PlayerTranslate selectedLanguage={currentLanguage} onLanguageSelected={toggleLanguage} />}
+            {showTranslate && (
+              <PlayerTranslate
+                selectedLanguage={currentLanguage}
+                onLanguageSelected={toggleLanguage}
+              />
+            )}
 
             {player.current && !isVideoBlocked && (
               <PlayerControls
@@ -518,7 +617,9 @@ const ClosedCaptionPlayer = ({ streamUrl }) => {
               />
             )}
 
-            {isVideoBlocked && <PlayerAutoPlayBlocked startPlayback={startPlayback} />}
+            {isVideoBlocked && (
+              <PlayerAutoPlayBlocked startPlayback={startPlayback} />
+            )}
           </div>
         </div>
       </div>

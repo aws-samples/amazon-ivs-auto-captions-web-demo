@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Deployment scripts folder",
   "dependencies": {
-    "archiver": "^5.3.0",
+    "archiver": "^7.0.1",
     "aws-sdk": "^2.1064.0",
     "js-yaml": "^4.1.0",
     "js-yaml-cloudformation-schema": "^1.0.0",

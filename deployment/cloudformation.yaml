@@ -261,7 +261,7 @@ Resources:
         S3Key: lambda-on-connect.zip
       FunctionName: !Ref LambdaOnConnectFunctionName
       Handler: app.handler
-      Runtime: nodejs14.x
+      Runtime: nodejs20.x
       Environment:
         Variables:
           TABLE_NAME: !Ref DynamoDBConnectionsTableName
@@ -275,7 +275,7 @@ Resources:
         S3Key: lambda-on-disconnect.zip
       FunctionName: !Ref LambdaOnDisconnectFunctionName
       Handler: app.handler
-      Runtime: nodejs14.x
+      Runtime: nodejs20.x
       Environment:
         Variables:
           TABLE_NAME: !Ref DynamoDBConnectionsTableName
@@ -289,11 +289,11 @@ Resources:
         S3Key: lambda-send-transcription.zip
       FunctionName: !Ref LambdaSendTranscriptionFunctionName
       Handler: app.handler
-      Runtime: nodejs14.x
+      Runtime: nodejs20.x
       Environment:
         Variables:
           TABLE_NAME: !Ref DynamoDBConnectionsTableName
-          GATEWAY_DOMAIN: !Sub "${ReaderWebSocket}.execute-api.${AWS::Region}.amazonaws.com/demo"
+          GATEWAY_DOMAIN: !Sub "https://${ReaderWebSocket}.execute-api.${AWS::Region}.amazonaws.com/demo"
           LAMBDA_SEND_TRANSCRIPTION_CHUNKS_NAME: !Ref LambdaSendTranscriptionChunksFunctionName
           LAMBDA_DELETE_STALE_CONNECTION_NAME: !Ref LambdaDeleteStaleConnectionFunctionName
 
@@ -306,11 +306,11 @@ Resources:
         S3Key: lambda-send-transcription-chunks.zip
       FunctionName: !Ref LambdaSendTranscriptionChunksFunctionName
       Handler: app.handler
-      Runtime: nodejs14.x
+      Runtime: nodejs20.x
       Environment:
         Variables:
           TABLE_NAME: !Ref DynamoDBConnectionsTableName
-          GATEWAY_DOMAIN: !Sub "${ReaderWebSocket}.execute-api.${AWS::Region}.amazonaws.com/demo"
+          GATEWAY_DOMAIN: !Sub "https://${ReaderWebSocket}.execute-api.${AWS::Region}.amazonaws.com/demo"
           LAMBDA_DELETE_STALE_CONNECTION_NAME: !Ref LambdaDeleteStaleConnectionFunctionName
 
   LambdaDeleteStaleConnection:
@@ -322,7 +322,7 @@ Resources:
         S3Key: lambda-delete-stale-connection.zip
       FunctionName: !Ref LambdaDeleteStaleConnectionFunctionName
       Handler: app.handler
-      Runtime: nodejs14.x
+      Runtime: nodejs20.x
       Environment:
         Variables:
           TABLE_NAME: !Ref DynamoDBConnectionsTableName

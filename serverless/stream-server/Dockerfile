@@ -4,6 +4,9 @@ FROM --platform=linux/amd64 buildpack-deps:stretch
 ENV NGINX_VERSION nginx-1.18.0
 ENV NGINX_RTMP_MODULE_VERSION 1.2.1
 
+# Use the Debian archive repository for stretch
+RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list
+
 # Install dependencies Stunnel4
 RUN apt-get update && \
     apt-get install -y ca-certificates openssl libssl-dev stunnel4 gettext && \

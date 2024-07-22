@@ -1,9 +1,10 @@
-const AWS = require('aws-sdk');
+const {
+  DynamoDBClient,
+  DeleteItemCommand
+} = require('@aws-sdk/client-dynamodb');
+const { marshall } = require('@aws-sdk/util-dynamodb');
 
-const ddb = new AWS.DynamoDB.DocumentClient({
-  apiVersion: '2012-08-10',
-  region: process.env.AWS_REGION,
-});
+const ddb = new DynamoDBClient();
 
 const { TABLE_NAME } = process.env;
 
@@ -12,8 +13,14 @@ exports.handler = async (event) => {
 
   try {
     console.log(`Deleting connection with id "${event.connectionId}".`);
-    await ddb.delete({ TableName: TABLE_NAME, Key: { connectionId: event.connectionId } }).promise();
-    console.log(`The connection with id "${event.connectionId}" has been deleted.`);
+    const deleteParams = {
+      TableName: TABLE_NAME,
+      Key: marshall({ connectionId: event.connectionId })
+    };
+    await ddb.send(new DeleteItemCommand(deleteParams));
+    console.log(
+      `The connection with id "${event.connectionId}" has been deleted.`
+    );
   } catch (e) {
     console.log(e);
     throw e;
