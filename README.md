@@ -14,7 +14,7 @@ This is a serverless web application, leveraging [Amazon IVS](https://aws.amazon
 <br>
 
 ## Getting Started
-### ⚠️ Please note that this demo is experimental, and should only be used for educational purposes.
+### ⛔️ This demo is experimental, and should only be used for educational purposes. Do not use this solution in any production environment. By deploying this solution, you understand and accept its risks and limitations.
 ⚠️ *Deploying this demo application in your AWS account will create and consume AWS resources, which will cost money.*
 
 To get the demo running in your own AWS account, follow these instructions.
