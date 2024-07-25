@@ -1,12 +1,11 @@
 # Amazon IVS Auto-captions Web demo
 
+> [!CAUTION]
+> **This code sample is a proof of concept designed exclusively for educational purposes**. It is **not** intended for production use. Its primary goal is to help you understand the concepts and capabilities of AWS services. **DO NOT** use this solution in any production environment. By using this solution, you understand and accept its risks and limitations.
+
 A demo web application for demonstrating how you can use Amazon IVS in conjunction with Amazon Transcribe to deliver real-time captions for live streams. This demo also shows how Amazon Translate can be used to deliver auto-translated captions to viewers (optional during deployment).
 
 ![Auto-captions demo](auto-captions-demo.jpg)
-
-> [!CAUTION]
-> This code sample is a proof of concept designed exclusively for educational purposes. It is **not** intended for production use. Its primary goal is to help you understand the concepts and capabilities of AWS services. **DO NOT** use this solution in any production environment.
-
 
 **This project is intended for education purposes only and not for production usage.**
 
