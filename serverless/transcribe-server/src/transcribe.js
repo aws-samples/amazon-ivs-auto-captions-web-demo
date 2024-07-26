@@ -1,7 +1,9 @@
-const { TranscribeStreamingClient, StartStreamTranscriptionCommand } = require('@aws-sdk/client-transcribe-streaming');
+const {
+  TranscribeStreamingClient,
+  StartStreamTranscriptionCommand
+} = require('@aws-sdk/client-transcribe-streaming');
 
 const {
-  AWS_REGION,
   AUDIO_LANGUAGE_TRANSCRIBE_CODE,
   AUDIO_LANGUAGE_CODE,
   MEDIA_SAMPLE_RATE_HERTZ,
@@ -15,7 +17,7 @@ const {
   WRITER_WEBSOCKET_SENDTRANSCRIPTION_ROUTE,
   SUCCESS_EXIT_CODE,
   ERROR_EXIT_CODE,
-  TWO_ROW_CHARACTER_COUNT,
+  TWO_ROW_CHARACTER_COUNT
 } = require('./constants');
 
 const metadataManager = require('./metadataManager');
@@ -24,12 +26,16 @@ const shortenTranscriptText = require('./utils/shortenTranscriptText');
 
 const { OVERLAYS_UTILS } = require('./utils');
 
-const directTranscriptionWSManager = new WebSocketManager(WRITER_WEBSOCKET_API_URL);
+const directTranscriptionWSManager = new WebSocketManager(
+  WRITER_WEBSOCKET_API_URL
+);
 directTranscriptionWSManager.connect();
 
 let translateTranscriptionWSManager;
 if (TRANSLATE_ENABLED == 'true') {
-  translateTranscriptionWSManager = new WebSocketManager(TRANSLATE_WEBSOCKET_URL);
+  translateTranscriptionWSManager = new WebSocketManager(
+    TRANSLATE_WEBSOCKET_URL
+  );
   translateTranscriptionWSManager.connect();
 }
 
@@ -50,9 +56,7 @@ const streamAudioToWebSocket = async function () {
     }
   };
 
-  const transcribeClient = new TranscribeStreamingClient({
-    region: AWS_REGION,
-  });
+  const transcribeClient = new TranscribeStreamingClient();
 
   const startStreamTranscriptionCommand = new StartStreamTranscriptionCommand({
     LanguageCode: AUDIO_LANGUAGE_TRANSCRIBE_CODE,
@@ -61,12 +65,16 @@ const streamAudioToWebSocket = async function () {
     VocabularyFilterMethod: VOCABULARY_FILTER_METHOD,
     MediaSampleRateHertz: MEDIA_SAMPLE_RATE_HERTZ,
     MediaEncoding: MEDIA_ENCODING,
-    AudioStream: transcribeInput(),
+    AudioStream: transcribeInput()
   });
 
-  const startStreamTranscriptionCommandOutput = await transcribeClient.send(startStreamTranscriptionCommand);
+  const startStreamTranscriptionCommandOutput = await transcribeClient.send(
+    startStreamTranscriptionCommand
+  );
 
-  console.log(`AWS Transcribe connection status code: ${startStreamTranscriptionCommandOutput.$metadata.httpStatusCode}`);
+  console.log(
+    `AWS Transcribe connection status code: ${startStreamTranscriptionCommandOutput.$metadata.httpStatusCode}`
+  );
 
   for await (const transcriptionEvent of startStreamTranscriptionCommandOutput.TranscriptResultStream) {
     if (transcriptionEvent.TranscriptEvent.Transcript) {
@@ -78,7 +86,10 @@ const streamAudioToWebSocket = async function () {
 
         // AUDIO TRANSCRIPTION
         if (AUDIO_LANGUAGE_CODE == 'en') {
-          metadataManager.sendOverlaysMetadata(results, overlaysInformation);
+          await metadataManager.sendOverlaysMetadata(
+            results,
+            overlaysInformation
+          );
           caption = buildCaptionForPartial(parsedTranscription);
           buildAndSendPayload(caption, AUDIO_LANGUAGE_CODE);
         } else if (parsedTranscription.partial === false) {
@@ -155,7 +166,7 @@ const parseTranscription = (results) => {
         text: transcriptText,
         startTime,
         endTime,
-        partial: results[0].IsPartial,
+        partial: results[0].IsPartial
       };
     }
 
@@ -169,16 +180,18 @@ const buildAndSendPayload = (data, lang) => {
   const payload = {
     action: WRITER_WEBSOCKET_SENDTRANSCRIPTION_ROUTE,
     data,
-    lang,
+    lang
   };
 
-  lang !== null ? directTranscriptionWSManager.send(payload) : translateTranscriptionWSManager.send(payload);
+  lang !== null
+    ? directTranscriptionWSManager.send(payload)
+    : translateTranscriptionWSManager.send(payload);
 };
 
 const buildCaptionForPartial = (parsedTranscription) => {
   return {
     ...parsedTranscription,
-    text: shortenTranscriptText(parsedTranscription.text),
+    text: shortenTranscriptText(parsedTranscription.text)
   };
 };
 
@@ -191,7 +204,10 @@ const buildCaptionForTotalTranscribe = (total) => {
   const caption = {};
   caption.partial = false;
   caption.text = total.text;
-  caption.startTime = total.startTime > previousSentCaptionEndTimeTranscribe ? total.startTime : previousSentCaptionEndTimeTranscribe;
+  caption.startTime =
+    total.startTime > previousSentCaptionEndTimeTranscribe
+      ? total.startTime
+      : previousSentCaptionEndTimeTranscribe;
   caption.endTime = caption.startTime + getDisplayTime(total.text);
 
   previousSentCaptionEndTimeTranscribe = caption.endTime;
@@ -203,7 +219,10 @@ const buildCaptionForTotalTranslate = (total) => {
   const caption = {};
   caption.partial = false;
   caption.text = total.text;
-  caption.startTime = total.startTime > previousSentCaptionEndTimeTranslate ? total.startTime : previousSentCaptionEndTimeTranslate;
+  caption.startTime =
+    total.startTime > previousSentCaptionEndTimeTranslate
+      ? total.startTime
+      : previousSentCaptionEndTimeTranslate;
   caption.endTime = caption.startTime + getDisplayTime(total.text);
 
   previousSentCaptionEndTimeTranslate = caption.endTime;

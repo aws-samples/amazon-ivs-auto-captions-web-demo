@@ -1,24 +1,32 @@
-const AWS = require('aws-sdk');
-const { IVS_CHANNEL_ARN, IVS_API_VERSION } = require('./constants');
+const { IvsClient, PutMetadataCommand } = require('@aws-sdk/client-ivs');
+const { IVS_CHANNEL_ARN } = require('./constants');
 
-const AwsIvs = new AWS.IVS({ apiVersion: IVS_API_VERSION });
+const AwsIvs = new IvsClient();
 
 let phraseOverlays = {};
 
-const ivsPutMetadata = (data) => {
-  const params = {
-    channelArn: IVS_CHANNEL_ARN,
-    metadata: JSON.stringify(data),
-  };
-
-  AwsIvs.putMetadata(params, (err) => {
-    if (err) {
-      console.log(`Put metadata error: ${err.message}`);
-    }
-  });
+const isEncoded = (str) => {
+  try {
+    return str !== decodeURIComponent(str);
+  } catch (e) {
+    return false;
+  }
 };
 
-const sendOverlayMetadataToIvs = (overlay, overlaysMap) => {
+const ivsPutMetadata = async (data) => {
+  const params = {
+    channelArn: IVS_CHANNEL_ARN,
+    metadata: JSON.stringify(data)
+  };
+
+  try {
+    await AwsIvs.send(new PutMetadataCommand(params));
+  } catch (err) {
+    console.log(`Put metadata error: ${err.message}`);
+  }
+};
+
+const sendOverlayMetadataToIvs = async (overlay, overlaysMap) => {
   const overlayMetadata = overlaysMap[overlay];
 
   if (overlayMetadata) {
@@ -26,37 +34,55 @@ const sendOverlayMetadataToIvs = (overlay, overlaysMap) => {
       type: 'overlay',
       imgUrl: overlayMetadata.imageUrl ?? '#',
       keyword: overlay,
-      url: overlayMetadata.website ?? null,
+      url: overlayMetadata.website ?? null
     };
 
-    ivsPutMetadata(payload);
+    await ivsPutMetadata(payload);
   }
 };
 
 module.exports = {
-  sendOverlaysMetadata: (results, overlaysInformation) => {
-    if (!(overlaysInformation?.overlaysPattern && results?.[0]?.Alternatives?.length > 0)) {
+  sendOverlaysMetadata: async (results, overlaysInformation) => {
+    if (
+      !(
+        overlaysInformation?.overlaysPattern &&
+        results?.[0]?.Alternatives?.length > 0
+      )
+    ) {
       return;
     }
 
-    const transcript = decodeURIComponent(escape(results[0].Alternatives[0].Transcript));
+    const transcriptRaw = results[0].Alternatives[0].Transcript;
+    const transcript = isEncoded(transcriptRaw)
+      ? decodeURIComponent(transcriptRaw)
+      : transcriptRaw;
     const matches = transcript.match(overlaysInformation.overlaysPattern) ?? [];
     const sentOverlays = Object.assign({}, phraseOverlays);
 
-    matches.forEach((overlay) => {
+    const promises = [];
+
+    matches.forEach(async (overlay) => {
       overlay = overlay.toLowerCase();
 
       if (sentOverlays[overlay] === undefined || sentOverlays[overlay] === 0) {
-        sendOverlayMetadataToIvs(overlay, overlaysInformation.overlaysMap);
-        phraseOverlays[overlay] = phraseOverlays[overlay] === undefined ? 1 : phraseOverlays[overlay] + 1;
-        sentOverlays[overlay] = sentOverlays[overlay] === undefined ? 1 : sentOverlays[overlay] + 1;
+        promises.push(
+          sendOverlayMetadataToIvs(overlay, overlaysInformation.overlaysMap)
+        );
+        phraseOverlays[overlay] =
+          phraseOverlays[overlay] === undefined
+            ? 1
+            : phraseOverlays[overlay] + 1;
+        sentOverlays[overlay] =
+          sentOverlays[overlay] === undefined ? 1 : sentOverlays[overlay] + 1;
       } else {
         sentOverlays[overlay] = sentOverlays[overlay] - 1;
       }
     });
 
+    await Promise.all(promises);
+
     if (!results[0].IsPartial) {
       phraseOverlays = {};
     }
-  },
+  }
 };

@@ -1,10 +1,20 @@
 const fs = require('fs');
-const AWS = require('aws-sdk');
+const {
+  ECSClient,
+  ListTasksCommand,
+  DescribeTasksCommand
+} = require('@aws-sdk/client-ecs');
+const {
+  EC2Client,
+  DescribeNetworkInterfacesCommand
+} = require('@aws-sdk/client-ec2');
 const { stackOutputFilePath } = require('minimist')(process.argv.slice(2));
 
 // Validate arguments
 if (!stackOutputFilePath) {
-  console.error('\n\nArgument validation failed:\n--stackOutputFilePath argument is missing');
+  console.error(
+    '\n\nArgument validation failed:\n--stackOutputFilePath argument is missing'
+  );
   process.exit(1);
 }
 
@@ -30,34 +40,47 @@ const generateOutput = async () => {
 
     const clusterName = findOutput(cloudformationOutputs, 'ClusterName');
 
-    const streamServiceName = findOutput(cloudformationOutputs, 'StreamServiceName');
+    const streamServiceName = findOutput(
+      cloudformationOutputs,
+      'StreamServiceName'
+    );
 
     const streamKey = findOutput(cloudformationOutputs, 'StreamKey');
 
     // Get Stream service task public IP
-    AWS.config.update({ region: awsRegion });
-    const ecs = new AWS.ECS();
-    const ec2 = new AWS.EC2();
+    const ecs = new ECSClient({ region: awsRegion });
+    const ec2 = new EC2Client({ region: awsRegion });
 
     const listTasksParams = {
       cluster: clusterName,
-      serviceName: streamServiceName,
+      serviceName: streamServiceName
     };
-    const listTasksResponse = await ecs.listTasks(listTasksParams).promise();
+    const listTasksResponse = await ecs.send(
+      new ListTasksCommand(listTasksParams)
+    );
     const taskArn = listTasksResponse.taskArns[0];
 
     const describeTasksParams = {
       cluster: clusterName,
-      tasks: [taskArn],
+      tasks: [taskArn]
     };
-    const describeTasksResponse = await ecs.describeTasks(describeTasksParams).promise();
-    const { value: networkInterfaceId } = describeTasksResponse.tasks[0].attachments[0].details.find((d) => d.name == 'networkInterfaceId');
+    const describeTasksResponse = await ecs.send(
+      new DescribeTasksCommand(describeTasksParams)
+    );
+    const { value: networkInterfaceId } =
+      describeTasksResponse.tasks[0].attachments[0].details.find(
+        (d) => d.name == 'networkInterfaceId'
+      );
 
     const describeNetworkInterfacesParams = {
-      NetworkInterfaceIds: [networkInterfaceId],
+      NetworkInterfaceIds: [networkInterfaceId]
     };
-    const describeNetworkInterfacesResponse = await ec2.describeNetworkInterfaces(describeNetworkInterfacesParams).promise();
-    const publicIp = describeNetworkInterfacesResponse.NetworkInterfaces[0].Association.PublicIp;
+    const describeNetworkInterfacesResponse = await ec2.send(
+      new DescribeNetworkInterfacesCommand(describeNetworkInterfacesParams)
+    );
+    const publicIp =
+      describeNetworkInterfacesResponse.NetworkInterfaces[0].Association
+        .PublicIp;
 
     const streamServerUrl = `rtmp://${publicIp}/ivs`;
     const output = `

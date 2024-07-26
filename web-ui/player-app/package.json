@@ -2,14 +2,11 @@
   "name": "player-app",
   "version": "1.0.0",
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.1",
-    "@testing-library/react": "^12.1.2",
-    "@testing-library/user-event": "^13.5.0",
     "can-autoplay": "^3.0.2",
     "env-cmd": "^10.1.0",
-    "react": "^17.0.2",
+    "react": "^18.3.1",
     "react-device-detect": "^2.1.2",
-    "react-dom": "^17.0.2",
+    "react-dom": "^18.3.1",
     "react-scripts": "^5.0.0"
   },
   "scripts": {

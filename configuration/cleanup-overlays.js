@@ -1,4 +1,9 @@
-const AWS = require('aws-sdk');
+const {
+  DynamoDBClient,
+  BatchWriteItemCommand,
+  DescribeTableCommand,
+  ScanCommand
+} = require('@aws-sdk/client-dynamodb');
 const _ = require('lodash/fp');
 const args = require('minimist')(process.argv.slice(2));
 
@@ -7,8 +12,7 @@ if (!args.tableName) {
   process.exit(1);
 }
 
-AWS.config.update({ region: args.awsRegion });
-const ddb = new AWS.DynamoDB();
+const ddb = new DynamoDBClient({ region: args.awsRegion });
 
 // Get all results, paginating until there are no more elements
 const getPaginatedResults = async (fn) => {
@@ -17,7 +21,9 @@ const getPaginatedResults = async (fn) => {
   for await (const lf of (async function* () {
     let NextMarker = EMPTY;
     while (NextMarker || NextMarker === EMPTY) {
-      const { marker, results } = await fn(NextMarker !== EMPTY ? NextMarker : undefined);
+      const { marker, results } = await fn(
+        NextMarker !== EMPTY ? NextMarker : undefined
+      );
 
       yield* results;
       NextMarker = marker;
@@ -33,26 +39,34 @@ const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 
 // Write a batch of items, taking care of retrying the request when some elements are unprocessed
 const batchWrite = async (items, retryCount = 0) => {
-  const res = await ddb.batchWriteItem({ RequestItems: items }).promise();
+  const { UnprocessedItems = [] } = await ddb.send(
+    new BatchWriteItemCommand({ RequestItems: items })
+  );
 
-  if (res.UnprocessedItems && res.UnprocessedItems.length > 0) {
+  if (UnprocessedItems.length > 0) {
     if (retryCount > 8) {
-      throw new Error(res.UnprocessedItems);
+      throw new Error(UnprocessedItems);
     }
     await wait(2 ** retryCount * 10);
 
-    return batchWrite(res.UnprocessedItems, retryCount + 1);
+    return batchWrite(UnprocessedItems, retryCount + 1);
   }
 };
 
 // Return the keys for a table
 const getKeyDefinitions = async (table) => {
-  const tableInfo = (await ddb.describeTable({ TableName: table }).promise()).Table;
-  return tableInfo.KeySchema.map(({ AttributeName, KeyType }) => {
+  const {
+    Table: { KeySchema = [], AttributeDefinitions = [] }
+  } = await ddb.send(new DescribeTableCommand({ TableName: table }));
+
+  return KeySchema.map(({ AttributeName, KeyType }) => {
     return {
       AttributeName,
-      AttributeType: tableInfo.AttributeDefinitions.find((attributeDefinition) => attributeDefinition.AttributeName === AttributeName).AttributeType,
-      KeyType,
+      AttributeType: AttributeDefinitions.find(
+        (attributeDefinition) =>
+          attributeDefinition.AttributeName === AttributeName
+      ).AttributeType,
+      KeyType
     };
   });
 };
@@ -64,17 +78,19 @@ const clearTable = async (table) => {
 
   // Get all items
   const allItems = await getPaginatedResults(async (LastEvaluatedKey) => {
-    const items = await ddb
-      .scan({
+    const items = await ddb.send(
+      new ScanCommand({
         TableName: table,
         ExclusiveStartKey: LastEvaluatedKey,
         ProjectionExpression: keys.map((_k, i) => `#K${i}`).join(', '),
-        ExpressionAttributeNames: _.fromPairs(keys.map(({ AttributeName }, i) => [`#K${i}`, AttributeName])),
+        ExpressionAttributeNames: _.fromPairs(
+          keys.map(({ AttributeName }, i) => [`#K${i}`, AttributeName])
+        )
       })
-      .promise();
+    );
     return {
       marker: items.LastEvaluatedKey,
-      results: items.Items,
+      results: items.Items
     };
   });
 
@@ -93,19 +109,21 @@ const clearTable = async (table) => {
                   return [AttributeName, obj[AttributeName]];
                 }),
                 _.fromPairs
-              )(keys),
-            },
+              )(keys)
+            }
           };
-        }),
+        })
       });
     })
   );
 };
 
-const cleanupOverlays = () => {
+const cleanupOverlays = async () => {
   try {
-    clearTable(args.tableName);
-    console.log(`\n\nOverlay items deleted from "${args.tableName}" table successfully!`);
+    await clearTable(args.tableName);
+    console.log(
+      `\n\nOverlay items deleted from "${args.tableName}" table successfully!`
+    );
   } catch (error) {
     console.error(`\n\nScript execution failed:\n${error.message}`);
     process.exit(2);
