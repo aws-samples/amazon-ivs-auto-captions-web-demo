@@ -1,4 +1,7 @@
-const AWS = require('aws-sdk');
+const {
+  DynamoDBClient,
+  BatchWriteItemCommand
+} = require('@aws-sdk/client-dynamodb');
 const fs = require('fs');
 const args = require('minimist')(process.argv.slice(2));
 
@@ -18,7 +21,9 @@ if (!args.awsRegion) {
 }
 
 if (missingArguments.length > 0) {
-  console.log(`\n\nArguments validation failed:\n${missingArguments.join('\n')}`);
+  console.log(
+    `\n\nArguments validation failed:\n${missingArguments.join('\n')}`
+  );
   process.exit(1);
 }
 
@@ -26,8 +31,7 @@ if (missingArguments.length > 0) {
 const filePath = args.filePath;
 const dynamoDbTableName = args.dynamoDbTable;
 
-AWS.config.update({ region: args.awsRegion });
-var ddb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
+const ddb = new DynamoDBClient({ region: args.awsRegion });
 
 const loadOverlays = () => {
   (async () => {
@@ -38,25 +42,31 @@ const loadOverlays = () => {
           Item: {
             keyword: { S: item.keyword },
             imageUrl: { S: item.imageUrl },
-            website: { S: item.website ?? '' },
-          },
-        },
+            website: { S: item.website ?? '' }
+          }
+        }
       }));
 
       const params = {
         RequestItems: {
-          [dynamoDbTableName]: formattedItems,
-        },
+          [dynamoDbTableName]: formattedItems
+        }
       };
 
-      const result = await ddb.batchWriteItem(params).promise();
+      const { UnprocessedItems = [] } = await ddb.send(
+        new BatchWriteItemCommand(params)
+      );
 
-      if (result.UnprocessedItems?.length > 0) {
-        console.error('\n\nError when loading overlay items. Please check the input file, cleanup the table and try again.');
+      if (UnprocessedItems.length > 0) {
+        console.error(
+          '\n\nError when loading overlay items. Please check the input file, cleanup the table and try again.'
+        );
         process.exit(2);
       }
 
-      console.log(`\n\nOverlay items loaded into "${dynamoDbTableName}" table successfully!`);
+      console.log(
+        `\n\nOverlay items loaded into "${dynamoDbTableName}" table successfully!`
+      );
     } catch (error) {
       console.error(`\n\nScript execution failed:\n${error.message}`);
       process.exit(3);

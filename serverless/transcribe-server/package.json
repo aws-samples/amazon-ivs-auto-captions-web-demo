@@ -4,8 +4,8 @@
   "description": "Transcribe server folder",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.616.0",
+    "@aws-sdk/client-ivs": "^3.616.0",
     "@aws-sdk/client-transcribe-streaming": "^3.616.0",
-    "aws-sdk": "^2.1064.0",
     "ws": "^8.4.2"
   }
 }

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Configuration scripts folder",
   "dependencies": {
-    "aws-sdk": "^2.1064.0",
+    "@aws-sdk/client-dynamodb": "^3.616.0",
     "lodash": "^4.17.21",
     "minimist": "^1.2.5"
   }

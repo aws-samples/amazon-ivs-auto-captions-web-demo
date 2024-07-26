@@ -1,10 +1,17 @@
 const fs = require('fs');
-const AWS = require('aws-sdk');
-const { stackName, stackOutputFilePath } = require('minimist')(process.argv.slice(2));
+const {
+  ApiGatewayV2Client,
+  DeleteStageCommand
+} = require('@aws-sdk/client-apigatewayv2');
+const { stackName, stackOutputFilePath } = require('minimist')(
+  process.argv.slice(2)
+);
 
 // Validate args
 if (!stackOutputFilePath) {
-  console.error('\n\nArg validation failed:\n--stackOutputFilePath argument is missing');
+  console.error(
+    '\n\nArg validation failed:\n--stackOutputFilePath argument is missing'
+  );
   process.exit(1);
 }
 
@@ -33,26 +40,31 @@ const deleteStages = async () => {
     // Get necessary values from stack output file
     const awsRegion = findOutput(cloudformationOutputs, 'AWSRegion');
 
-    const writerWebSocketApiId = findOutput(cloudformationOutputs, 'WriterWebSocketApiId');
+    const writerWebSocketApiId = findOutput(
+      cloudformationOutputs,
+      'WriterWebSocketApiId'
+    );
 
-    const readerWebSocketApiId = findOutput(cloudformationOutputs, 'ReaderWebSocketApiId');
+    const readerWebSocketApiId = findOutput(
+      cloudformationOutputs,
+      'ReaderWebSocketApiId'
+    );
 
     // Delete stages
-    AWS.config.update({ region: awsRegion });
-    const apigatewayv2 = new AWS.ApiGatewayV2();
+    const apigatewayv2 = new ApiGatewayV2Client({ region: awsRegion });
 
     const deleteStageWriterParams = {
       ApiId: writerWebSocketApiId,
-      StageName: 'demo',
+      StageName: 'demo'
     };
-    await apigatewayv2.deleteStage(deleteStageWriterParams).promise();
+    await apigatewayv2.send(new DeleteStageCommand(deleteStageWriterParams));
     console.log('\nWriter WebSocket API "demo" stage deleted!');
 
     const deleteStageReaderParams = {
       ApiId: readerWebSocketApiId,
-      StageName: 'demo',
+      StageName: 'demo'
     };
-    await apigatewayv2.deleteStage(deleteStageReaderParams).promise();
+    await apigatewayv2.send(new DeleteStageCommand(deleteStageReaderParams));
     console.log('\nReader WebSocket API "demo" stage deleted!');
   } catch (error) {
     console.error(`\n\nScript execution failed:\n${error.message}`);
