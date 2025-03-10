@@ -25,6 +25,6 @@ aws cloudformation wait stack-create-complete --stack-name $STACKNAME
 if [ $? != 0 ]; then exit 1; fi
 
 printf "\n\nSaving stack outputs...\n"
-aws cloudformation describe-stacks --stack-name $STACKNAME > stack.json
+aws cloudformation describe-stacks --output json --stack-name $STACKNAME > stack.json
 
 printf "\n\nStack creation complete!\n"

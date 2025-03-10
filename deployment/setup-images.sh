@@ -31,7 +31,7 @@ printf "\n\nCreating image repository for Stream service...\n"
 aws ecr create-repository --repository-name $STREAM_REPOSITORY_NAME
 printf "\n\nBuilding and pushing Stream service image...\n"
 cd ../serverless/stream-server
-docker build -q -t $ECR_REGISTRY/$STREAM_REPOSITORY_NAME:latest .
+docker buildx build --platform linux/amd64 -q -t $ECR_REGISTRY/$STREAM_REPOSITORY_NAME:latest .
 docker push $ECR_REGISTRY/$STREAM_REPOSITORY_NAME:latest
 if [ $? != 0 ]; then exit 1; fi
 
@@ -40,7 +40,7 @@ printf "\n\nCreating image repository for Transcribe service...\n"
 aws ecr create-repository --repository-name $TRANSCRIBE_REPOSITORY_NAME
 printf "\n\nBuilding and pushing Transcribe service image...\n"
 cd ../transcribe-server && cp -r ../utils ./src/utils
-docker build -q -t $ECR_REGISTRY/$TRANSCRIBE_REPOSITORY_NAME:latest .
+docker buildx build --platform linux/amd64 -q -t $ECR_REGISTRY/$TRANSCRIBE_REPOSITORY_NAME:latest .
 rm -rf ./src/utils
 docker push $ECR_REGISTRY/$TRANSCRIBE_REPOSITORY_NAME:latest
 if [ $? != 0 ]; then exit 1; fi
@@ -52,7 +52,7 @@ then
 	aws ecr create-repository --repository-name $TRANSLATE_REPOSITORY_NAME
 	printf "\n\nBuilding and pushing Translate service image...\n"
 	cd ../translate-server && cp -r ../utils ./src/utils
-	docker build -q -t $ECR_REGISTRY/$TRANSLATE_REPOSITORY_NAME:latest .
+	docker buildx build --platform linux/amd64 -q -t $ECR_REGISTRY/$TRANSLATE_REPOSITORY_NAME:latest .
 	rm -rf ./src/utils
 	docker push $ECR_REGISTRY/$TRANSLATE_REPOSITORY_NAME:latest
 	cd ../../deployment

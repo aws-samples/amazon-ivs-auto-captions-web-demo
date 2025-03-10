@@ -6,7 +6,7 @@
 * [AWS account](https://aws.amazon.com/) to create resources
 * [AWS CLI version 2](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) to run scripts
 * [Git Bash](https://git-scm.com/) to run Bash scripts (only on Windows)
-* [Docker version 20.10.5 or later](https://www.docker.com/) and Docker daemon up and running to build and push ECS container images
+* [Docker version 20.10.5 or later](https://www.docker.com/) with Docker `buildx` installed and Docker daemon up and running to build and push ECS container images
 
 <br>
 
